@@ -100,6 +100,30 @@ export default function BusinessCardCalculator() {
     }
   }, [selectedOptions, productId])
 
+  // Auto-select hidden fields in embedded mode
+  useEffect(() => {
+    if (embeddedMode && optionGroups.length > 0) {
+      const hiddenFieldsInEmbedded = ["Product Type", "Product Category", "Size", "Product Orientation", "Shape"]
+
+      const newSelections: Record<string, string> = {}
+      let hasNewSelections = false
+
+      optionGroups.forEach((group) => {
+        if (hiddenFieldsInEmbedded.includes(group.product_option_group_name)) {
+          // If not already selected, select the first option
+          if (!selectedOptions[group.product_option_group_name] && group.options.length > 0) {
+            newSelections[group.product_option_group_name] = group.options[0].option_uuid
+            hasNewSelections = true
+          }
+        }
+      })
+
+      if (hasNewSelections) {
+        setSelectedOptions(prev => ({ ...prev, ...newSelections }))
+      }
+    }
+  }, [embeddedMode, optionGroups])
+
   // Send calculator data to WordPress when price or options change
   useEffect(() => {
     if (embeddedMode && prices.length > 0 && selectedTurnaround) {
@@ -643,6 +667,19 @@ export default function BusinessCardCalculator() {
               {optionGroups.map((group) => {
                 // Skip Turn Around Time - it's handled separately below
                 if (group.product_option_group_name === "Turn Around Time") {
+                  return null
+                }
+
+                // Hide these fields in embedded mode (WordPress handles them)
+                const hiddenFieldsInEmbedded = [
+                  "Product Type",
+                  "Product Category",
+                  "Size",
+                  "Product Orientation",
+                  "Shape"
+                ]
+
+                if (embeddedMode && hiddenFieldsInEmbedded.includes(group.product_option_group_name)) {
                   return null
                 }
 
