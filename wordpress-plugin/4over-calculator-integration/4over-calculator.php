@@ -136,9 +136,9 @@ class FourOver_Calculator_Integration {
                 <iframe
                     id="fourover-calculator-iframe"
                     src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($category_id) . '&embedded=true'); ?>"
-                    style="width: 100% !important; min-height: 1400px !important; height: 1400px !important; border: none !important; border-radius: 8px !important; display: block !important;"
+                    style="width: 100% !important; min-height: 800px !important; height: auto !important; border: none !important; border-radius: 8px !important; display: block !important;"
                     frameborder="0"
-                    scrolling="auto"
+                    scrolling="no"
                 ></iframe>
             </div>
 
@@ -214,7 +214,10 @@ class FourOver_Calculator_Integration {
             .woocommerce-variation-form,
             .single_variation_wrap,
             .woocommerce-product-rating,
-            form.cart:not(.fourover-calculator-wrapper form) {
+            form.cart:not(.fourover-calculator-wrapper form),
+            .product .summary .price,
+            .product .summary p.price,
+            .woocommerce-product-details__short-description {
                 display: none !important;
             }
 

@@ -124,6 +124,26 @@ export default function BusinessCardCalculator() {
     }
   }, [embeddedMode, optionGroups])
 
+  // Send iframe height to WordPress for dynamic resizing
+  useEffect(() => {
+    if (embeddedMode) {
+      const sendHeight = () => {
+        const height = document.documentElement.scrollHeight
+        window.parent.postMessage({
+          type: "RESIZE_IFRAME",
+          height: height
+        }, "*")
+      }
+
+      // Send height on mount and when content changes
+      sendHeight()
+
+      // Also send after a short delay to account for animations/loading
+      const timer = setTimeout(sendHeight, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [embeddedMode, prices, selectedTurnaround, optionGroups])
+
   // Send calculator data to WordPress when price or options change
   useEffect(() => {
     if (embeddedMode && prices.length > 0 && selectedTurnaround) {
