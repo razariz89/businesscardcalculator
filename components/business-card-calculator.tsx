@@ -567,7 +567,8 @@ export default function BusinessCardCalculator() {
               <CardTitle>Select Print Options</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {categories.length > 0 && (
+              {/* Hide category dropdown in embedded mode when category is passed via URL */}
+              {categories.length > 0 && !embeddedMode && (
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
                   <Select value={categoryId} onValueChange={setCategoryId}>
@@ -700,19 +701,24 @@ export default function BusinessCardCalculator() {
                 )}
               </div>
 
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={handleAddToCart}
-                disabled={!productId || !selectedTurnaround || calculating}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                ADD TO CART
-              </Button>
+              {/* Hide buttons in embedded mode - WordPress plugin handles add to cart */}
+              {!embeddedMode && (
+                <>
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handleAddToCart}
+                    disabled={!productId || !selectedTurnaround || calculating}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    ADD TO CART
+                  </Button>
 
-              <div className="text-center text-sm text-muted-foreground">
-                or <button className="text-primary hover:underline">Start Your Design Online</button>
-              </div>
+                  <div className="text-center text-sm text-muted-foreground">
+                    or <button className="text-primary hover:underline">Start Your Design Online</button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

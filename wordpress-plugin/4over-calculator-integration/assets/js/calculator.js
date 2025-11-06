@@ -12,12 +12,16 @@
         // Verify origin
         const allowedOrigins = [
             'https://v0-businesscardcalculator.vercel.app',
+            'https://businesscardcalculator.vercel.app',
             'http://localhost:3000'
         ];
 
         if (!allowedOrigins.includes(event.origin)) {
+            console.log('Message from unauthorized origin:', event.origin);
             return;
         }
+
+        console.log('Message from calculator:', event.data);
 
         const data = event.data;
 

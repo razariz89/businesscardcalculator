@@ -49,8 +49,8 @@ class FourOver_Calculator_Integration {
         add_action('woocommerce_product_options_general_product_data', array($this, 'add_category_id_field'));
         add_action('woocommerce_process_product_meta', array($this, 'save_category_id_field'));
 
-        // Frontend hooks
-        add_action('woocommerce_before_add_to_cart_button', array($this, 'display_calculator'));
+        // Frontend hooks - Display calculator BEFORE the form (not inside it)
+        add_action('woocommerce_before_add_to_cart_form', array($this, 'display_calculator'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
         // AJAX hooks for cart integration
@@ -63,6 +63,9 @@ class FourOver_Calculator_Integration {
 
         // Shortcode
         add_shortcode('fourover_calculator', array($this, 'calculator_shortcode'));
+
+        // Hide cart quantity update controls for calculator items
+        add_action('wp_head', array($this, 'hide_cart_quantity_controls'));
     }
 
     public function woocommerce_missing_notice() {
@@ -127,15 +130,15 @@ class FourOver_Calculator_Integration {
         $calculator_url = get_option('fourover_calculator_url', 'https://businesscardcalculator.vercel.app');
 
         ?>
-        <div id="fourover-calculator-container" class="fourover-calculator-wrapper">
-            <h3><?php _e('Configure Your Product', '4over-calc'); ?></h3>
-            <div id="fourover-calculator-iframe-wrapper">
+        <div id="fourover-calculator-container" class="fourover-calculator-wrapper" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+            <h3 style="display: block !important;"><?php _e('Configure Your Product', '4over-calc'); ?></h3>
+            <div id="fourover-calculator-iframe-wrapper" style="display: block !important;">
                 <iframe
                     id="fourover-calculator-iframe"
                     src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($category_id) . '&embedded=true'); ?>"
-                    style="width: 100%; min-height: 800px; border: none; border-radius: 8px;"
+                    style="width: 100% !important; min-height: 1400px !important; height: 1400px !important; border: none !important; border-radius: 8px !important; display: block !important;"
                     frameborder="0"
-                    scrolling="no"
+                    scrolling="auto"
                 ></iframe>
             </div>
 
@@ -143,11 +146,11 @@ class FourOver_Calculator_Integration {
             <input type="hidden" id="fourover-calculated-price" name="fourover_price" value="" />
             <input type="hidden" id="fourover-product-details" name="fourover_details" value="" />
 
-            <div class="fourover-cart-actions">
-                <button type="button" id="fourover-add-to-cart-btn" class="button alt" disabled>
+            <div class="fourover-cart-actions" style="display: flex !important;">
+                <button type="button" id="fourover-add-to-cart-btn" class="button alt" disabled style="display: inline-block !important;">
                     <?php _e('Add to Cart', '4over-calc'); ?>
                 </button>
-                <div id="fourover-price-display" class="fourover-price">
+                <div id="fourover-price-display" class="fourover-price" style="display: inline-block !important;">
                     <span class="price-label"><?php _e('Price:', '4over-calc'); ?></span>
                     <span class="price-amount">--</span>
                 </div>
@@ -184,6 +187,7 @@ class FourOver_Calculator_Integration {
                 color: white;
                 border: none;
                 border-radius: 4px;
+                line-height: 1;
             }
             #fourover-add-to-cart-btn:hover:not(:disabled) {
                 background-color: #005a87;
@@ -206,26 +210,27 @@ class FourOver_Calculator_Integration {
                 font-size: 24px;
             }
 
-            /* Hide default WooCommerce elements when calculator is active */
-            body.fourover-calculator-active div.product form.cart,
-            body.fourover-calculator-active div.product form.cart .quantity,
-            body.fourover-calculator-active div.product form.cart .variations,
-            body.fourover-calculator-active div.product form.cart .single_variation_wrap,
-            body.fourover-calculator-active div.product form.cart button.single_add_to_cart_button {
+            /* Hide ONLY WooCommerce default form elements - simple and clean approach */
+            .woocommerce-variation-form,
+            .single_variation_wrap,
+            .woocommerce-product-rating,
+            form.cart:not(.fourover-calculator-wrapper form) {
                 display: none !important;
             }
-            body.fourover-calculator-active .product .summary .price,
-            body.fourover-calculator-active .product .summary .woocommerce-variation-price,
-            body.fourover-calculator-active .product .summary .woocommerce-variation-availability {
-                display: none !important;
+
+            #fourover-add-to-cart-btn {
+                display: inline-block !important;
+            }
+
+            #fourover-price-display {
+                display: inline-block !important;
+            }
+
+            /* Hide calculator internal elements using iframe CSS injection */
+            #fourover-calculator-iframe {
+                /* Note: We'll hide elements inside iframe via postMessage to the calculator app */
             }
         </style>
-
-        <script>
-            jQuery(document).ready(function() {
-                jQuery('body').addClass('fourover-calculator-active');
-            });
-        </script>
         <?php
     }
 
@@ -271,6 +276,12 @@ class FourOver_Calculator_Integration {
         $options = isset($_POST['options']) ? json_decode(stripslashes($_POST['options']), true) : array();
         $details = isset($_POST['details']) ? sanitize_text_field($_POST['details']) : '';
 
+        // Get quantity from options (from calculator)
+        $quantity = 1;
+        if (isset($options['quantity']) && is_numeric($options['quantity'])) {
+            $quantity = intval($options['quantity']);
+        }
+
         if (!$product_id || !$price) {
             wp_send_json_error(array('message' => 'Invalid product or price'));
             return;
@@ -294,8 +305,8 @@ class FourOver_Calculator_Integration {
             }
         });
 
-        // Add to cart
-        $cart_item_key = WC()->cart->add_to_cart($product_id, 1);
+        // Add to cart with calculated quantity
+        $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity);
 
         if ($cart_item_key) {
             wp_send_json_success(array(
@@ -414,6 +425,30 @@ class FourOver_Calculator_Integration {
     }
 
     /**
+     * Hide cart quantity controls for calculator items
+     */
+    public function hide_cart_quantity_controls() {
+        if (is_cart()) {
+            ?>
+            <style>
+                /* Hide quantity controls for all items */
+                .woocommerce-cart-form .product-quantity .quantity,
+                .woocommerce-cart-form .product-quantity input,
+                .woocommerce-cart-form button[name="update_cart"],
+                .woocommerce-cart-form .actions .coupon {
+                    display: none !important;
+                }
+
+                /* Show quantity as text only */
+                .woocommerce-cart-form .product-quantity {
+                    font-weight: bold;
+                }
+            </style>
+            <?php
+        }
+    }
+
+    /**
      * Shortcode handler
      */
     public function calculator_shortcode($atts) {
@@ -481,7 +516,16 @@ function fourover_get_item_data($item_data, $cart_item) {
         $options = is_string($cart_item['fourover_options']) ? json_decode($cart_item['fourover_options'], true) : $cart_item['fourover_options'];
 
         if (is_array($options) && !empty($options)) {
+            // Fields to skip from cart display
+            $skip_fields = ['quantity', 'product_type', 'product_category', 'size', 'producttype', 'productcategory'];
+
             foreach ($options as $option_name => $option_value) {
+                // Skip unwanted fields
+                $option_name_lower = strtolower(str_replace(['_', ' ', '-'], '', $option_name));
+                if (in_array($option_name_lower, $skip_fields)) {
+                    continue;
+                }
+
                 // Format the option name to be readable
                 $formatted_name = ucwords(str_replace('_', ' ', $option_name));
 
