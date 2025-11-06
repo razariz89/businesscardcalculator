@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(vercel login:*)",
+      "Bash(vercel:*)",
+      "Bash(bash create-plugin-zip.sh:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
