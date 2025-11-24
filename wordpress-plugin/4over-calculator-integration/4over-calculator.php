@@ -136,7 +136,7 @@ class FourOver_Calculator_Integration {
                 <iframe
                     id="fourover-calculator-iframe"
                     src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($category_id) . '&embedded=true'); ?>"
-                    style="width: 100% !important; min-height: 680px !important; height: auto !important; border: none !important; border-radius: 8px !important; display: block !important;"
+                    style="width: 100% !important; min-height: 500px !important; height: auto !important; border: none !important; border-radius: 8px !important; display: block !important;"
                     frameborder="0"
                     scrolling="no"
                 ></iframe>
@@ -146,20 +146,20 @@ class FourOver_Calculator_Integration {
             <input type="hidden" id="fourover-calculated-price" name="fourover_price" value="" />
             <input type="hidden" id="fourover-product-details" name="fourover_details" value="" />
 
-            <div class="fourover-cart-actions" style="display: flex !important;">
-                <button type="button" id="fourover-add-to-cart-btn" class="button alt" disabled style="display: inline-block !important;">
+            <div class="fourover-cart-actions" style="display: block !important;">
+                <button type="button" id="fourover-add-to-cart-btn" class="single_add_to_cart_button button alt" disabled style="display: block !important; width: 100% !important;">
                     <?php _e('Add to Cart', '4over-calc'); ?>
                 </button>
-                <div id="fourover-price-display" class="fourover-price" style="display: inline-block !important;">
+                <!-- <div id="fourover-price-display" class="fourover-price" style="display: inline-block !important;">
                     <span class="price-label"><?php _e('Price:', '4over-calc'); ?></span>
                     <span class="price-amount">--</span>
-                </div>
+                </div> -->
             </div>
         </div>
 
         <style>
             .fourover-calculator-wrapper {
-               margin: 0px 0 30px;
+               margin: 0px 0 10px;
                 /*  padding: 20px;
                 background: #f9f9f9;
                 border-radius: 8px; */
