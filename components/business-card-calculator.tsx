@@ -763,9 +763,9 @@ export default function BusinessCardCalculator() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-xs text-muted-foreground">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
-                            <div className="font-bold text-2xl">${priceOption.price.toFixed(2)}</div>
-                            <div className="text-sm font-semibold">Total: ${priceOption.price.toFixed(2)}</div>
+                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 1.15).toFixed(2)}</div>
+                            <div className="font-bold text-3xl text-primary">${priceOption.price.toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">Total: ${priceOption.price.toFixed(2)}</div>
                           </div>
                         </div>
                       ))}
