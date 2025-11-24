@@ -131,7 +131,7 @@ class FourOver_Calculator_Integration {
 
         ?>
         <div id="fourover-calculator-container" class="fourover-calculator-wrapper" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
-            <h3 style="display: block !important;"><?php _e('Configure Your Product', '4over-calc'); ?></h3>
+            <!-- <h3 style="display: block !important;"><?php _e('Configure Your Product', '4over-calc'); ?></h3> -->
             <div id="fourover-calculator-iframe-wrapper" style="display: block !important;">
                 <iframe
                     id="fourover-calculator-iframe"
@@ -159,10 +159,10 @@ class FourOver_Calculator_Integration {
 
         <style>
             .fourover-calculator-wrapper {
-                margin: 30px 0;
-                padding: 20px;
+               margin: 0px 0 30px;
+                /*  padding: 20px;
                 background: #f9f9f9;
-                border-radius: 8px;
+                border-radius: 8px; */
             }
             .fourover-calculator-wrapper h3 {
                 margin-top: 0;
@@ -170,7 +170,7 @@ class FourOver_Calculator_Integration {
                 font-size: 1.5em;
             }
             #fourover-calculator-iframe {
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                /* box-shadow: 0 2px 8px rgba(0,0,0,0.1); */
             }
             .fourover-cart-actions {
                 margin-top: 20px;
@@ -279,37 +279,32 @@ class FourOver_Calculator_Integration {
         $options = isset($_POST['options']) ? json_decode(stripslashes($_POST['options']), true) : array();
         $details = isset($_POST['details']) ? sanitize_text_field($_POST['details']) : '';
 
-        // Get quantity from options (from calculator)
-        $quantity = 1;
-        if (isset($options['quantity']) && is_numeric($options['quantity'])) {
-            $quantity = intval($options['quantity']);
-        }
-
         if (!$product_id || !$price) {
             wp_send_json_error(array('message' => 'Invalid product or price'));
             return;
         }
 
-        // Add custom price to cart item
-        add_filter('woocommerce_add_cart_item_data', function($cart_item_data, $product_id, $variation_id) use ($price, $options, $details) {
-            $cart_item_data['fourover_custom_price'] = $price;
-            $cart_item_data['fourover_options'] = $options;
-            $cart_item_data['fourover_details'] = $details;
-            $cart_item_data['unique_key'] = md5(microtime() . rand());
-            return $cart_item_data;
-        }, 10, 3);
+        // Get the product to check its type
+        $product = wc_get_product($product_id);
+        if (!$product) {
+            wp_send_json_error(array('message' => 'Product not found'));
+            return;
+        }
 
-        // Set custom price
-        add_action('woocommerce_before_calculate_totals', function($cart) use ($price) {
-            foreach ($cart->get_cart() as $cart_item) {
-                if (isset($cart_item['fourover_custom_price'])) {
-                    $cart_item['data']->set_price($cart_item['fourover_custom_price']);
-                }
-            }
-        });
-
-        // Add to cart with calculated quantity
-        $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity);
+        // Add to cart with quantity = 1
+        // The price from calculator already includes the total for all quantity
+        $cart_item_key = WC()->cart->add_to_cart(
+            $product_id,
+            1,  // Always 1 - price already includes quantity cost
+            0,  // No variation
+            array(),  // No variation attributes
+            array(
+                'fourover_custom_price' => $price,
+                'fourover_options' => $options,
+                'fourover_details' => $details,
+                'unique_key' => md5(microtime() . rand())
+            )
+        );
 
         if ($cart_item_key) {
             wp_send_json_success(array(
@@ -431,24 +426,68 @@ class FourOver_Calculator_Integration {
      * Hide cart quantity controls for calculator items
      */
     public function hide_cart_quantity_controls() {
-        if (is_cart()) {
-            ?>
-            <style>
-                /* Hide quantity controls for all items */
-                .woocommerce-cart-form .product-quantity .quantity,
-                .woocommerce-cart-form .product-quantity input,
-                .woocommerce-cart-form button[name="update_cart"],
-                .woocommerce-cart-form .actions .coupon {
-                    display: none !important;
+        if (!is_cart() && !is_checkout()) {
+            return;
+        }
+        ?>
+        <style type="text/css">
+            /* Force hide quantity column - MAXIMUM PRIORITY */
+            table.shop_table.cart td.product-quantity,
+            table.shop_table.cart th.product-quantity,
+            .woocommerce-cart-form table.cart td.product-quantity,
+            .woocommerce-cart-form table.cart th.product-quantity,
+            .cart-collaterals td.product-quantity,
+            td.product-quantity,
+            th.product-quantity,
+            .product-quantity {
+                display: none !important;
+                visibility: hidden !important;
+                width: 0 !important;
+                height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Hide update cart button */
+            button[name="update_cart"],
+            .button[name="update_cart"],
+            input[name="update_cart"] {
+                display: none !important;
+            }
+        </style>
+        <script type="text/javascript">
+            (function() {
+                // Run immediately
+                function hideQuantity() {
+                    // Remove quantity column
+                    var qtyElements = document.querySelectorAll('td.product-quantity, th.product-quantity, .product-quantity');
+                    qtyElements.forEach(function(el) {
+                        el.style.display = 'none';
+                        el.remove();
+                    });
+
+                    // Remove update cart button
+                    var updateBtn = document.querySelector('button[name="update_cart"]');
+                    if (updateBtn) {
+                        updateBtn.style.display = 'none';
+                        updateBtn.remove();
+                    }
                 }
 
-                /* Show quantity as text only */
-                .woocommerce-cart-form .product-quantity {
-                    font-weight: bold;
+                // Run on page load
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', hideQuantity);
+                } else {
+                    hideQuantity();
                 }
-            </style>
-            <?php
-        }
+
+                // Run after a short delay as backup
+                setTimeout(hideQuantity, 100);
+                setTimeout(hideQuantity, 500);
+                setTimeout(hideQuantity, 1000);
+            })();
+        </script>
+        <?php
     }
 
     /**
@@ -498,18 +537,94 @@ function fourover_add_cart_item_data($cart_item_data, $product_id, $variation_id
     return $cart_item_data;
 }
 
-// Apply custom price to cart
+// Apply custom price to cart AND FORCE QUANTITY TO 1
 add_action('woocommerce_before_calculate_totals', 'fourover_before_calculate_totals', 10, 1);
 function fourover_before_calculate_totals($cart) {
     if (is_admin() && !defined('DOING_AJAX')) {
         return;
     }
 
-    foreach ($cart->get_cart() as $cart_item) {
+    foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
         if (isset($cart_item['fourover_custom_price'])) {
+            // FORCE quantity to 1 - this is critical!
+            $cart_item['quantity'] = 1;
+            WC()->cart->set_quantity($cart_item_key, 1, false);
+
+            // Set the price - this is the total price for the quantity already
             $cart_item['data']->set_price($cart_item['fourover_custom_price']);
         }
     }
+}
+
+// Make calculator products virtual (no shipping needed)
+add_filter('woocommerce_product_needs_shipping', 'fourover_disable_shipping_for_calculator', 10, 2);
+function fourover_disable_shipping_for_calculator($needs_shipping, $product) {
+    // Check if this product is in cart with calculator pricing
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        if (isset($cart_item['fourover_custom_price']) && $cart_item['product_id'] == $product->get_id()) {
+            return false; // No shipping needed
+        }
+    }
+    return $needs_shipping;
+}
+
+// Add free shipping method for calculator products
+add_filter('woocommerce_package_rates', 'fourover_add_free_shipping', 10, 2);
+function fourover_add_free_shipping($rates, $package) {
+    // Check if package contains calculator products
+    $has_calculator_product = false;
+
+    foreach ($package['contents'] as $item) {
+        if (isset($item['fourover_custom_price'])) {
+            $has_calculator_product = true;
+            break;
+        }
+    }
+
+    if ($has_calculator_product) {
+        // Add a free shipping option
+        $rates['free_shipping'] = new WC_Shipping_Rate(
+            'free_shipping',
+            'Free Shipping (Included in Price)',
+            0,
+            array(),
+            'free_shipping'
+        );
+    }
+
+    return $rates;
+}
+
+// Prevent quantity changes for calculator items - always keep it as 1
+add_filter('woocommerce_cart_item_quantity', 'fourover_lock_cart_item_quantity', 10, 3);
+function fourover_lock_cart_item_quantity($product_quantity, $cart_item_key, $cart_item) {
+    // If this is a calculator item, return quantity as plain text (not editable)
+    if (isset($cart_item['fourover_custom_price'])) {
+        return '1'; // Just show 1, not editable
+    }
+    return $product_quantity;
+}
+
+// Force quantity to always be 1 for calculator items (prevent manual changes)
+add_filter('woocommerce_cart_item_quantity', 'fourover_force_quantity_one', 10, 3);
+function fourover_force_quantity_one($quantity, $cart_item_key, $cart_item) {
+    if (isset($cart_item['fourover_custom_price'])) {
+        // Return empty string - quantity column will be hidden by CSS
+        return '';
+    }
+    return $quantity;
+}
+
+// Block any attempt to update quantity for calculator items
+add_filter('woocommerce_update_cart_action_cart_updated', 'fourover_prevent_quantity_update', 10, 1);
+function fourover_prevent_quantity_update($cart_updated) {
+    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+        if (isset($cart_item['fourover_custom_price'])) {
+            // Force set quantity back to 1
+            WC()->cart->set_quantity($cart_item_key, 1, false);
+        }
+    }
+    return $cart_updated;
 }
 
 // Display custom options in cart
@@ -519,8 +634,8 @@ function fourover_get_item_data($item_data, $cart_item) {
         $options = is_string($cart_item['fourover_options']) ? json_decode($cart_item['fourover_options'], true) : $cart_item['fourover_options'];
 
         if (is_array($options) && !empty($options)) {
-            // Fields to skip from cart display
-            $skip_fields = ['quantity', 'product_type', 'product_category', 'size', 'producttype', 'productcategory'];
+            // Fields to skip from cart display (except quantity - we want to show it)
+            $skip_fields = ['product_type', 'product_category', 'size', 'producttype', 'productcategory'];
 
             foreach ($options as $option_name => $option_value) {
                 // Skip unwanted fields

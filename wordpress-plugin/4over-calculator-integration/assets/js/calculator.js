@@ -9,6 +9,9 @@
 
     // Listen for messages from iframe
     window.addEventListener('message', function(event) {
+        console.log('📩 Message received from:', event.origin);
+        console.log('📩 Message data:', event.data);
+
         // Verify origin
         const allowedOrigins = [
             'https://v0-businesscardcalculator.vercel.app',
@@ -17,26 +20,36 @@
         ];
 
         if (!allowedOrigins.includes(event.origin)) {
-            console.log('Message from unauthorized origin:', event.origin);
+            console.warn('⚠️ Message from unauthorized origin:', event.origin);
+            console.warn('⚠️ Allowed origins:', allowedOrigins);
             return;
         }
 
-        console.log('Message from calculator:', event.data);
+        console.log('✅ Message from authorized calculator:', event.data);
 
         const data = event.data;
 
         // Handle different message types
         if (data.type === 'CALCULATOR_DATA') {
+            console.log('📊 Handling CALCULATOR_DATA');
             handleCalculatorData(data);
         } else if (data.type === 'ADD_TO_CART') {
+            console.log('🛒 Handling ADD_TO_CART');
             handleAddToCart(data);
         } else if (data.type === 'RESIZE_IFRAME') {
+            console.log('📏 Handling RESIZE_IFRAME');
             handleIframeResize(data);
+        } else {
+            console.log('❓ Unknown message type:', data.type);
         }
     });
 
     function handleCalculatorData(data) {
-        console.log('Calculator data received:', data);
+        console.log('✅ Calculator data received:', data);
+        console.log('✅ Price:', data.price);
+
+        // Debug alert - REMOVE THIS AFTER TESTING
+        // alert('Price received: $' + data.price);
 
         calculatorData = {
             price: data.price || 0,
@@ -54,11 +67,15 @@
         // Update price display
         updatePriceDisplay(calculatorData.price);
 
+        console.log('✅ Price display updated to:', calculatorData.price);
+
         // Enable add to cart button if price is available
         if (calculatorData.price > 0) {
             $('#fourover-add-to-cart-btn').prop('disabled', false).text('Add to Cart');
+            console.log('✅ Button enabled');
         } else {
             $('#fourover-add-to-cart-btn').prop('disabled', true).text('Configure Options');
+            console.log('⚠️ Button disabled - no price');
         }
 
         // Trigger custom event

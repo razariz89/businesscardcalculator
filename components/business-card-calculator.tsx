@@ -584,10 +584,28 @@ export default function BusinessCardCalculator() {
     return selectedRunsize?.option_name || "1000"
   }
 
+  // Loading skeleton
+  const LoadingSkeleton = () => (
+    <div className="space-y-6 animate-pulse">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="space-y-2">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+          <div className="h-12 w-full bg-gray-100 rounded-lg border border-gray-200"></div>
+        </div>
+      ))}
+      <div className="space-y-3 pt-4">
+        <div className="h-4 w-32 bg-gray-200 rounded"></div>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-16 w-full bg-gray-50 rounded-lg border border-gray-200"></div>
+        ))}
+      </div>
+    </div>
+  )
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="w-full max-w-4xl mx-auto py-6">
+        <LoadingSkeleton />
       </div>
     )
   }
@@ -603,14 +621,8 @@ export default function BusinessCardCalculator() {
   const selectedProduct = filteredProducts.find((p) => p.product_uuid === productId)
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl">
-      <div className="grid lg:grid-cols-[1fr_400px] gap-8">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Select Print Options</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+    <div className="w-full max-w-4xl mx-auto py-6">
+      <div className="space-y-6">
               {/* Hide category dropdown in embedded mode when category is passed via URL */}
               {categories.length > 0 && !embeddedMode && (
                 <div className="space-y-2">
@@ -633,7 +645,7 @@ export default function BusinessCardCalculator() {
               {/* Size Selection */}
               {allProducts.length > 0 ? (
                 <div className="space-y-2">
-                  <Label htmlFor="size">Size</Label>
+                  <Label htmlFor="size" className="text-base font-semibold">Size</Label>
                   {sizes.length > 0 ? (
                     <Select
                       value={selectedSize}
@@ -642,7 +654,7 @@ export default function BusinessCardCalculator() {
                         setSelectedSize(value)
                       }}
                     >
-                      <SelectTrigger id="size">
+                      <SelectTrigger id="size" className="h-12 text-base">
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
                       <SelectContent>
@@ -654,7 +666,9 @@ export default function BusinessCardCalculator() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <div className="text-sm text-muted-foreground py-2">Extracting sizes from products...</div>
+                    <div className="h-12 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
+                      <span className="text-sm text-muted-foreground">Loading sizes...</span>
+                    </div>
                   )}
                 </div>
               ) : null}
@@ -705,12 +719,12 @@ export default function BusinessCardCalculator() {
 
                 return (
                   <div key={group.product_option_group_uuid} className="space-y-2">
-                    <Label htmlFor={group.product_option_group_name}>{group.product_option_group_name}</Label>
+                    <Label htmlFor={group.product_option_group_name} className="text-base font-semibold">{group.product_option_group_name}</Label>
                     <Select
                       value={selectedOptions[group.product_option_group_name] || ""}
                       onValueChange={(value) => handleOptionChange(group.product_option_group_name, value)}
                     >
-                      <SelectTrigger id={group.product_option_group_name}>
+                      <SelectTrigger id={group.product_option_group_name} className="h-12 text-base">
                         <SelectValue placeholder={`Select ${group.product_option_group_name.toLowerCase()}`} />
                       </SelectTrigger>
                       <SelectContent>
@@ -725,8 +739,8 @@ export default function BusinessCardCalculator() {
                 )
               })}
 
-              <div className="space-y-3">
-                <Label>Ready to Ship In</Label>
+              <div className="space-y-3 pt-4">
+                <Label className="text-base font-semibold">Quantity</Label>
                 {calculating ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -736,25 +750,29 @@ export default function BusinessCardCalculator() {
                     {prices.map((priceOption: any) => (
                       <div
                         key={priceOption.option_uuid}
-                        className="flex items-center justify-between space-x-2 rounded-lg border p-3 hover:bg-accent cursor-pointer"
+                        className="flex items-center justify-between rounded-lg border-2 p-4 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50"
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} />
-                          <Label htmlFor={priceOption.option_uuid} className="cursor-pointer font-normal">
-                            {priceOption.turnaround}
-                          </Label>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} className="h-5 w-5" />
+                          <div>
+                            <Label htmlFor={priceOption.option_uuid} className="cursor-pointer font-semibold text-base">
+                              Buy {quantity} pieces
+                            </Label>
+                            <div className="text-sm text-muted-foreground mt-0.5">
+                              {priceOption.turnaround}
+                            </div>
+                          </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-lg text-primary">${priceOption.price.toFixed(2)}</div>
-                          <div className="text-xs text-muted-foreground">
-                            (${(priceOption.price / Number.parseInt(quantity)).toFixed(3)}/ea)
-                          </div>
+                          <div className="text-sm text-muted-foreground">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
+                          <div className="font-bold text-xl">${priceOption.price.toFixed(2)}</div>
+                          <div className="text-xs text-muted-foreground">Total: ${priceOption.price.toFixed(2)}</div>
                         </div>
                       </div>
                     ))}
                   </RadioGroup>
                 ) : (
-                  <div className="text-sm text-muted-foreground text-center py-4">Select options to see pricing</div>
+                  <div className="text-sm text-muted-foreground text-center py-4 bg-gray-50 rounded-lg border">Select all options to see pricing</div>
                 )}
               </div>
 
@@ -776,9 +794,6 @@ export default function BusinessCardCalculator() {
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   )
