@@ -136,7 +136,7 @@ class FourOver_Calculator_Integration {
                 <iframe
                     id="fourover-calculator-iframe"
                     src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($category_id) . '&embedded=true'); ?>"
-                    style="width: 100% !important; min-height: 800px !important; height: auto !important; border: none !important; border-radius: 8px !important; display: block !important;"
+                    style="width: 100% !important; min-height: 680px !important; height: auto !important; border: none !important; border-radius: 8px !important; display: block !important;"
                     frameborder="0"
                     scrolling="no"
                 ></iframe>
@@ -164,7 +164,7 @@ class FourOver_Calculator_Integration {
                 background: #f9f9f9;
                 border-radius: 8px; */
             }
-            
+
             .fourover-calculator-wrapper h3 {
                 margin-top: 0;
                 margin-bottom: 20px;
@@ -497,7 +497,7 @@ class FourOver_Calculator_Integration {
     public function calculator_shortcode($atts) {
         $atts = shortcode_atts(array(
             'category_id' => '',
-            'height' => '800px'
+            'height' => '680px'
         ), $atts);
 
         if (empty($atts['category_id'])) {
