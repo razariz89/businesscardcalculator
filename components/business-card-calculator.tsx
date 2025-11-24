@@ -753,19 +753,20 @@ export default function BusinessCardCalculator() {
                             <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} className="h-5 w-5" />
                             <div>
                               <Label htmlFor={priceOption.option_uuid} className="cursor-pointer font-semibold text-base">
-                                Buy {quantity} pieces
+                                {/* Buy {quantity} pieces */}
+                                 {priceOption.turnaround}
                               </Label>
-                              {priceOption.turnaround && (
+                              {/* {priceOption.turnaround && (
                                 <div className="text-sm text-muted-foreground mt-0.5">
                                   {priceOption.turnaround}
                                 </div>
-                              )}
+                              )} */}
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 1.15).toFixed(2)}</div>
-                            <div className="font-bold text-3xl text-primary">${priceOption.price.toFixed(2)}</div>
-                            <div className="text-xs text-muted-foreground">Total: ${priceOption.price.toFixed(2)}</div>
+                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 1.1).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
+                            <div className="font-bold text-2xl">Total: ${priceOption.price.toFixed(2)}</div>
                           </div>
                         </div>
                       ))}
