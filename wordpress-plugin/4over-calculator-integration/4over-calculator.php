@@ -164,6 +164,7 @@ class FourOver_Calculator_Integration {
                 background: #f9f9f9;
                 border-radius: 8px; */
             }
+            
             .fourover-calculator-wrapper h3 {
                 margin-top: 0;
                 margin-bottom: 20px;
