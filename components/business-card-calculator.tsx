@@ -643,35 +643,33 @@ export default function BusinessCardCalculator() {
               )}
 
               {/* Size Selection */}
-              {allProducts.length > 0 ? (
-                <div className="space-y-2">
-                  <Label htmlFor="size" className="text-base font-semibold">Size</Label>
-                  {sizes.length > 0 ? (
-                    <Select
-                      value={selectedSize}
-                      onValueChange={(value) => {
-                        console.log("[v0] Size selected:", value)
-                        setSelectedSize(value)
-                      }}
-                    >
-                      <SelectTrigger id="size" className="h-12 text-base">
-                        <SelectValue placeholder="Select size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sizes.map((size) => (
-                          <SelectItem key={size} value={size}>
-                            {size}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="h-12 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
-                      <span className="text-sm text-muted-foreground">Loading sizes...</span>
-                    </div>
-                  )}
-                </div>
-              ) : null}
+              <div className="grid grid-cols-[180px_1fr] gap-4 items-center">
+                <Label htmlFor="size" className="text-base font-semibold text-left">Size</Label>
+                {sizes.length > 0 ? (
+                  <Select
+                    value={selectedSize}
+                    onValueChange={(value) => {
+                      console.log("[v0] Size selected:", value)
+                      setSelectedSize(value)
+                    }}
+                  >
+                    <SelectTrigger id="size" className="h-12 text-base">
+                      <SelectValue placeholder="Select size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sizes.map((size) => (
+                        <SelectItem key={size} value={size}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="h-12 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
+                    <span className="text-sm text-muted-foreground">Loading sizes...</span>
+                  </div>
+                )}
+              </div>
 
               {/* Product Selection */}
               {(productsLoading || filteredProducts.length > 0 || allProducts.length > 0) && (
@@ -718,8 +716,8 @@ export default function BusinessCardCalculator() {
                 }
 
                 return (
-                  <div key={group.product_option_group_uuid} className="space-y-2">
-                    <Label htmlFor={group.product_option_group_name} className="text-base font-semibold">{group.product_option_group_name}</Label>
+                  <div key={group.product_option_group_uuid} className="grid grid-cols-[180px_1fr] gap-4 items-center">
+                    <Label htmlFor={group.product_option_group_name} className="text-base font-semibold text-left">{group.product_option_group_name}</Label>
                     <Select
                       value={selectedOptions[group.product_option_group_name] || ""}
                       onValueChange={(value) => handleOptionChange(group.product_option_group_name, value)}
@@ -739,41 +737,45 @@ export default function BusinessCardCalculator() {
                 )
               })}
 
-              <div className="space-y-3 pt-4">
-                <Label className="text-base font-semibold">Quantity</Label>
-                {calculating ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                ) : prices.length > 0 ? (
-                  <RadioGroup value={selectedTurnaround} onValueChange={setSelectedTurnaround}>
-                    {prices.map((priceOption: any) => (
-                      <div
-                        key={priceOption.option_uuid}
-                        className="flex items-center justify-between rounded-lg border-2 p-4 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} className="h-5 w-5" />
-                          <div>
-                            <Label htmlFor={priceOption.option_uuid} className="cursor-pointer font-semibold text-base">
-                              Buy {quantity} pieces
-                            </Label>
-                            <div className="text-sm text-muted-foreground mt-0.5">
-                              {priceOption.turnaround}
+              <div className="grid grid-cols-[180px_1fr] gap-4 pt-4">
+                <Label className="text-base font-semibold text-left pt-2">Quantity</Label>
+                <div className="space-y-3">
+                  {calculating ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  ) : prices.length > 0 ? (
+                    <RadioGroup value={selectedTurnaround} onValueChange={setSelectedTurnaround}>
+                      {prices.map((priceOption: any) => (
+                        <div
+                          key={priceOption.option_uuid}
+                          className="flex items-center justify-between rounded-lg border-2 p-4 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} className="h-5 w-5" />
+                            <div>
+                              <Label htmlFor={priceOption.option_uuid} className="cursor-pointer font-semibold text-base">
+                                Buy {quantity} pieces
+                              </Label>
+                              {priceOption.turnaround && (
+                                <div className="text-sm text-muted-foreground mt-0.5">
+                                  {priceOption.turnaround}
+                                </div>
+                              )}
                             </div>
                           </div>
+                          <div className="text-right">
+                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 1.1).toFixed(2)}</div>
+                            <div className="font-bold text-xl">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
+                            <div className="text-xs font-bold">Total: ${priceOption.price.toFixed(2)}</div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-sm text-muted-foreground">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
-                          <div className="font-bold text-xl">${priceOption.price.toFixed(2)}</div>
-                          <div className="text-xs text-muted-foreground">Total: ${priceOption.price.toFixed(2)}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                ) : (
-                  <div className="text-sm text-muted-foreground text-center py-4 bg-gray-50 rounded-lg border">Select all options to see pricing</div>
-                )}
+                      ))}
+                    </RadioGroup>
+                  ) : (
+                    <div className="text-sm text-muted-foreground text-center py-4 bg-gray-50 rounded-lg border">Select all options to see pricing</div>
+                  )}
+                </div>
               </div>
 
               {/* Hide buttons in embedded mode - WordPress plugin handles add to cart */}
