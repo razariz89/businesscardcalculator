@@ -625,10 +625,10 @@ export default function BusinessCardCalculator() {
       <div className="space-y-6">
               {/* Hide category dropdown in embedded mode when category is passed via URL */}
               {categories.length > 0 && !embeddedMode && (
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                <div className="grid grid-cols-[180px_1fr] gap-4 items-center">
+                  <Label htmlFor="category" className="text-base font-semibold text-left">Category</Label>
                   <Select value={categoryId} onValueChange={setCategoryId}>
-                    <SelectTrigger id="category">
+                    <SelectTrigger id="category" className="h-12 text-base">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -672,29 +672,27 @@ export default function BusinessCardCalculator() {
               </div>
 
               {/* Product Selection */}
-              {(productsLoading || filteredProducts.length > 0 || allProducts.length > 0) && (
-                <div className="space-y-2">
-                  <Label htmlFor="product">Product</Label>
-                  {productsLoading ? (
-                    <div className="flex items-center justify-center py-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    </div>
-                  ) : (
-                    <Select value={productId || ""} onValueChange={setProductId}>
-                      <SelectTrigger id="product">
-                        <SelectValue placeholder="Select product" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(filteredProducts.length > 0 ? filteredProducts : allProducts).map((prod) => (
-                          <SelectItem key={prod.product_uuid} value={prod.product_uuid || ""}>
-                            {prod.product_description}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              )}
+              <div className="grid grid-cols-[180px_1fr] gap-4 items-center">
+                <Label htmlFor="product" className="text-base font-semibold text-left">Product</Label>
+                {productsLoading ? (
+                  <div className="h-12 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <Select value={productId || ""} onValueChange={setProductId}>
+                    <SelectTrigger id="product" className="h-12 text-base">
+                      <SelectValue placeholder="Select product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(filteredProducts.length > 0 ? filteredProducts : allProducts).map((prod) => (
+                        <SelectItem key={prod.product_uuid} value={prod.product_uuid || ""}>
+                          {prod.product_description}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
 
               {optionGroups.map((group) => {
                 // Skip Turn Around Time - it's handled separately below
