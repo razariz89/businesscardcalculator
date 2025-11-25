@@ -52,6 +52,7 @@ export default function BusinessCardCalculator() {
   const [loading, setLoading] = useState(true)
   const [calculating, setCalculating] = useState(false)
   const [productsLoading, setProductsLoading] = useState(false)
+  const [optionGroupsLoading, setOptionGroupsLoading] = useState(false)
 
   const [categories, setCategories] = useState<Category[]>([])
   const [allProducts, setAllProducts] = useState<Product[]>([])
@@ -397,6 +398,7 @@ export default function BusinessCardCalculator() {
 
   const loadOptionGroups = async (prodId: string) => {
     try {
+      setOptionGroupsLoading(true)
       console.log("[v0] Fetching option groups for product:", prodId)
       const res = await fetch(`/api/4over/products/${prodId}/optiongroups`)
       const data = await res.json()
@@ -425,6 +427,8 @@ export default function BusinessCardCalculator() {
       }
     } catch (error) {
       console.error("[v0] Error loading option groups:", error)
+    } finally {
+      setOptionGroupsLoading(false)
     }
   }
 
@@ -602,7 +606,7 @@ export default function BusinessCardCalculator() {
     </div>
   )
 
-  if (loading) {
+  if (loading || optionGroupsLoading || productsLoading || optionGroups.length === 0) {
     return (
       <div className="w-full max-w-4xl mx-auto py-6">
         <LoadingSkeleton />
@@ -621,7 +625,7 @@ export default function BusinessCardCalculator() {
   const selectedProduct = filteredProducts.find((p) => p.product_uuid === productId)
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-6">
+    <div className="w-full max-w-4xl mx-auto ">
       <div className="space-y-6">
               {/* Hide category dropdown in embedded mode when category is passed via URL */}
               {categories.length > 0 && !embeddedMode && (
