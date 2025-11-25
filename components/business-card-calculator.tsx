@@ -297,8 +297,8 @@ export default function BusinessCardCalculator() {
         console.log("[v0] Filtered products count:", filtered.length)
         setFilteredProducts(filtered)
 
-        // Auto-select first product of selected size
-        if (filtered.length > 0 && !productId) {
+        // Auto-select first product when size is set
+        if (filtered.length > 0) {
           console.log("[v0] Auto-selecting first filtered product:", filtered[0].product_uuid)
           setProductId(filtered[0].product_uuid)
         }
@@ -715,13 +715,15 @@ export default function BusinessCardCalculator() {
 
                 return (
                   <div key={group.product_option_group_uuid} className="grid grid-cols-[180px_1fr] gap-4 items-center">
-                    <Label htmlFor={group.product_option_group_name} className="text-base font-semibold text-left">{group.product_option_group_name}</Label>
+                    <Label htmlFor={group.product_option_group_name} className="text-base font-semibold text-left">
+                      {group.product_option_group_name === "Runsize" ? "Quantity" : group.product_option_group_name}
+                    </Label>
                     <Select
                       value={selectedOptions[group.product_option_group_name] || ""}
                       onValueChange={(value) => handleOptionChange(group.product_option_group_name, value)}
                     >
                       <SelectTrigger id={group.product_option_group_name} className="h-12 text-base">
-                        <SelectValue placeholder={`Select ${group.product_option_group_name.toLowerCase()}`} />
+                        <SelectValue placeholder={`Select ${group.product_option_group_name === "Runsize" ? "quantity" : group.product_option_group_name.toLowerCase()}`} />
                       </SelectTrigger>
                       <SelectContent>
                         {group.options.map((option) => (
@@ -736,7 +738,7 @@ export default function BusinessCardCalculator() {
               })}
 
               <div className="grid grid-cols-[180px_1fr] gap-4 pt-4">
-                <Label className="text-base font-semibold text-left pt-2">Quantity</Label>
+                <Label className="text-base font-semibold text-left pt-2">Ready to Ship In</Label>
                 <div className="space-y-3">
                   {calculating ? (
                     <div className="flex items-center justify-center py-8">
