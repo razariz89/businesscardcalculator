@@ -749,7 +749,7 @@ export default function BusinessCardCalculator() {
                       {prices.map((priceOption: any) => (
                         <div
                           key={priceOption.option_uuid}
-                          className="flex items-center justify-between rounded-lg border-2 p-4 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50"
+                          className="flex items-center justify-between rounded-lg border-2 py-2 px-4 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50"
                         >
                           <div className="flex items-center space-x-3">
                             <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} className="h-5 w-5" />
