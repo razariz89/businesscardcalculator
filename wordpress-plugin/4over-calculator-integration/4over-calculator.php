@@ -163,10 +163,11 @@ class FourOver_Calculator_Integration
             <input type="hidden" id="fourover-upload-later" name="fourover_upload_later" value="" />
 
             <div class="fourover-cart-actions" style="display: block !important;">
-                <button type="button" id="fourover-upload-file-btn" class="button" style="display: block !important; width: 100% !important; margin-bottom: 10px;">
+                <button type="button" id="fourover-upload-file-btn" class="button" style="display: block !important; width: 100% !important;">
                     <?php _e('Upload Your File', '4over-calc'); ?>
                 </button>
-                <button type="button" id="fourover-add-to-cart-btn" class="single_add_to_cart_button button alt" disabled style="display: block !important; width: 100% !important;">
+                <!-- Add to Cart button hidden on product page, only visible in drawer -->
+                <button type="button" id="fourover-add-to-cart-btn" class="single_add_to_cart_button button alt" disabled style="display: none !important;">
                     <?php _e('Add to Cart', '4over-calc'); ?>
                 </button>
             </div>
@@ -275,9 +276,9 @@ class FourOver_Calculator_Integration
 
             /* Mobile responsive */
             @media (max-width: 768px) {
-                .fourover-calculator-wrapper {
+                /* .fourover-calculator-wrapper {
                     margin: 0 -15px 10px -15px;
-                }
+                } */
 
                 #fourover-calculator-iframe {
                     border-radius: 0 !important;
