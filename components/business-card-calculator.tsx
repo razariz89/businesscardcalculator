@@ -129,6 +129,9 @@ export default function BusinessCardCalculator() {
   // Send iframe height to WordPress for dynamic resizing using ResizeObserver
   useEffect(() => {
     if (embeddedMode) {
+      let lastSentHeight = 0
+      let resizeTimeout: NodeJS.Timeout | null = null
+
       const sendHeight = () => {
         // Get the actual content height
         const body = document.body
@@ -141,16 +144,27 @@ export default function BusinessCardCalculator() {
           html.offsetHeight
         )
 
-        console.log("[v0] Sending height to parent:", height)
-        window.parent.postMessage({
-          type: "RESIZE_IFRAME",
-          height: height + 20 // Add small buffer
-        }, "*")
+        // Only send if height changed by more than 5px to avoid infinite loops
+        if (Math.abs(height - lastSentHeight) > 5) {
+          console.log("[v0] Sending height to parent:", height)
+          lastSentHeight = height
+          window.parent.postMessage({
+            type: "RESIZE_IFRAME",
+            height: height + 20 // Add small buffer
+          }, "*")
+        }
+      }
+
+      const debouncedSendHeight = () => {
+        if (resizeTimeout) {
+          clearTimeout(resizeTimeout)
+        }
+        resizeTimeout = setTimeout(sendHeight, 100)
       }
 
       // Use ResizeObserver for more reliable height tracking
       const resizeObserver = new ResizeObserver(() => {
-        sendHeight()
+        debouncedSendHeight()
       })
 
       // Observe the body element
@@ -162,13 +176,12 @@ export default function BusinessCardCalculator() {
       // Also send after delays to ensure everything is loaded
       const timer1 = setTimeout(sendHeight, 500)
       const timer2 = setTimeout(sendHeight, 1000)
-      const timer3 = setTimeout(sendHeight, 2000)
 
       return () => {
         resizeObserver.disconnect()
+        if (resizeTimeout) clearTimeout(resizeTimeout)
         clearTimeout(timer1)
         clearTimeout(timer2)
-        clearTimeout(timer3)
       }
     }
   }, [embeddedMode])
@@ -655,12 +668,12 @@ export default function BusinessCardCalculator() {
   const selectedProduct = filteredProducts.find((p) => p.product_uuid === productId)
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 md:px-0">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-0">
       <div className="space-y-4">
               {/* Hide category dropdown in embedded mode when category is passed via URL */}
               {categories.length > 0 && !embeddedMode && (
-                <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                  <Label htmlFor="category" className="text-sm font-semibold text-left mb-1 md:mb-0">Category</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                  <Label htmlFor="category" className="text-sm font-semibold text-left mb-1 sm:mb-0">Category</Label>
                   <Select value={categoryId} onValueChange={setCategoryId}>
                     <SelectTrigger id="category" className="h-10 text-sm">
                       <SelectValue placeholder="Select category" />
@@ -677,8 +690,8 @@ export default function BusinessCardCalculator() {
               )}
 
               {/* Size Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                <Label htmlFor="size" className="text-sm font-semibold text-left mb-1 md:mb-0">Size</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                <Label htmlFor="size" className="text-sm font-semibold text-left mb-1 sm:mb-0">Size</Label>
                 {sizes.length > 0 ? (
                   <Select
                     value={selectedSize}
@@ -706,8 +719,8 @@ export default function BusinessCardCalculator() {
               </div>
 
               {/* Product Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                <Label htmlFor="product" className="text-sm font-semibold text-left mb-1 md:mb-0">Product</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                <Label htmlFor="product" className="text-sm font-semibold text-left mb-1 sm:mb-0">Product</Label>
                 {productsLoading ? (
                   <div className="h-10 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -748,8 +761,8 @@ export default function BusinessCardCalculator() {
                 }
 
                 return (
-                  <div key={group.product_option_group_uuid} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                    <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left mb-1 md:mb-0">
+                  <div key={group.product_option_group_uuid} className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                    <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left mb-1 sm:mb-0">
                       {group.product_option_group_name === "Runsize" ? "Quantity" : group.product_option_group_name}
                     </Label>
                     <Select
@@ -772,8 +785,8 @@ export default function BusinessCardCalculator() {
               })}
 
               <div className="">
-                <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3">
-                  <Label className="text-sm font-semibold text-left mb-1 md:mb-0 pt-2">Ready to Ship In</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3">
+                  <Label className="text-sm font-semibold text-left mb-1 sm:mb-0 pt-2">Ready to Ship In</Label>
                   <div className="space-y-2">
                   {calculating ? (
                     <div className="flex items-center justify-center py-8">
