@@ -370,7 +370,8 @@
     });
 
     // Upload Later
-    $('#fourover-upload-later-btn').on('click', function() {
+    $('#fourover-upload-later-btn').on('click', function(e) {
+        e.preventDefault();
         console.log('Upload later clicked');
 
         // Mark as upload later

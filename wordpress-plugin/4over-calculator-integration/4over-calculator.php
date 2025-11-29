@@ -213,10 +213,12 @@ class FourOver_Calculator_Integration {
                             <button type="button" id="fourover-drawer-add-to-cart" class="button alt" disabled>
                                 <?php _e('Add to Cart', '4over-calc'); ?>
                             </button>
-                            <p class="fourover-drawer-divider"><?php _e("Don't have your files ready?", '4over-calc'); ?></p>
-                            <button type="button" id="fourover-upload-later-btn" class="button">
-                                <?php _e('Upload Later', '4over-calc'); ?>
-                            </button>
+                            <p class="fourover-drawer-divider">
+                                <?php _e("Don't have your files ready?", '4over-calc'); ?>
+                                <a href="#" id="fourover-upload-later-btn" class="fourover-upload-later-link">
+                                    <?php _e('Upload Later', '4over-calc'); ?>
+                                </a>
+                            </p>
                         </div>
 
                         <!-- BE PREPARED Section -->
@@ -473,6 +475,19 @@ class FourOver_Calculator_Integration {
                 text-align: center;
                 margin: 20px 0;
                 color: #666;
+                font-size: 14px;
+            }
+            .fourover-upload-later-link {
+                color: #000;
+                text-decoration: underline;
+                font-weight: normal;
+                cursor: pointer;
+                display: inline;
+                margin-left: 5px;
+            }
+            .fourover-upload-later-link:hover {
+                color: #333;
+                text-decoration: underline;
             }
             .fourover-be-prepared {
                 margin-top: 30px;
@@ -901,6 +916,30 @@ function fourover_force_quantity_one($quantity, $cart_item_key, $cart_item) {
     return $quantity;
 }
 
+// Helper function to get file type icon
+function fourover_get_file_icon($filename) {
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+    $icons = array(
+        'pdf' => '📄',
+        'ai' => '🎨',
+        'psd' => '🎨',
+        'eps' => '🎨',
+        'jpg' => '🖼️',
+        'jpeg' => '🖼️',
+        'png' => '🖼️',
+        'gif' => '🖼️',
+        'svg' => '🖼️',
+        'doc' => '📝',
+        'docx' => '📝',
+        'txt' => '📝',
+        'zip' => '📦',
+        'rar' => '📦',
+    );
+
+    return isset($icons[$extension]) ? $icons[$extension] : '📄';
+}
+
 // Block any attempt to update quantity for calculator items
 add_filter('woocommerce_update_cart_action_cart_updated', 'fourover_prevent_quantity_update', 10, 1);
 function fourover_prevent_quantity_update($cart_updated) {
@@ -952,17 +991,19 @@ function fourover_get_item_data($item_data, $cart_item) {
 
     // Display uploaded files
     if (isset($cart_item['fourover_front_file']) && !empty($cart_item['fourover_front_file'])) {
+        $icon = fourover_get_file_icon($cart_item['fourover_front_file']);
         $item_data[] = array(
             'name' => __('Front Side Artwork', '4over-calc'),
-            'value' => '📄 ' . $cart_item['fourover_front_file'],
+            'value' => $icon . ' ' . $cart_item['fourover_front_file'],
             'display' => ''
         );
     }
 
     if (isset($cart_item['fourover_back_file']) && !empty($cart_item['fourover_back_file'])) {
+        $icon = fourover_get_file_icon($cart_item['fourover_back_file']);
         $item_data[] = array(
             'name' => __('Back Side Artwork', '4over-calc'),
-            'value' => '📄 ' . $cart_item['fourover_back_file'],
+            'value' => $icon . ' ' . $cart_item['fourover_back_file'],
             'display' => ''
         );
     }
@@ -1011,11 +1052,13 @@ function fourover_checkout_create_order_line_item($item, $cart_item_key, $values
 
     // Save file information
     if (isset($values['fourover_front_file']) && !empty($values['fourover_front_file'])) {
-        $item->add_meta_data('Front Side Artwork', '📄 ' . $values['fourover_front_file'], true);
+        $icon = fourover_get_file_icon($values['fourover_front_file']);
+        $item->add_meta_data('Front Side Artwork', $icon . ' ' . $values['fourover_front_file'], true);
     }
 
     if (isset($values['fourover_back_file']) && !empty($values['fourover_back_file'])) {
-        $item->add_meta_data('Back Side Artwork', '📄 ' . $values['fourover_back_file'], true);
+        $icon = fourover_get_file_icon($values['fourover_back_file']);
+        $item->add_meta_data('Back Side Artwork', $icon . ' ' . $values['fourover_back_file'], true);
     }
 
     if (isset($values['fourover_upload_later']) && $values['fourover_upload_later'] === 'yes') {
