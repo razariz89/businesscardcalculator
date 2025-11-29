@@ -643,12 +643,12 @@ export default function BusinessCardCalculator() {
   const selectedProduct = filteredProducts.find((p) => p.product_uuid === productId)
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 md:px-0">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-0">
       <div className="space-y-4">
               {/* Hide category dropdown in embedded mode when category is passed via URL */}
               {categories.length > 0 && !embeddedMode && (
-                <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                  <Label htmlFor="category" className="text-sm font-semibold text-left mb-1 md:mb-0">Category</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                  <Label htmlFor="category" className="text-sm font-semibold text-left mb-1 sm:mb-0">Category</Label>
                   <Select value={categoryId} onValueChange={setCategoryId}>
                     <SelectTrigger id="category" className="h-10 text-sm">
                       <SelectValue placeholder="Select category" />
@@ -665,8 +665,8 @@ export default function BusinessCardCalculator() {
               )}
 
               {/* Size Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                <Label htmlFor="size" className="text-sm font-semibold text-left mb-1 md:mb-0">Size</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                <Label htmlFor="size" className="text-sm font-semibold text-left mb-1 sm:mb-0">Size</Label>
                 {sizes.length > 0 ? (
                   <Select
                     value={selectedSize}
@@ -694,8 +694,8 @@ export default function BusinessCardCalculator() {
               </div>
 
               {/* Product Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                <Label htmlFor="product" className="text-sm font-semibold text-left mb-1 md:mb-0">Product</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                <Label htmlFor="product" className="text-sm font-semibold text-left mb-1 sm:mb-0">Product</Label>
                 {productsLoading ? (
                   <div className="h-10 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -736,8 +736,8 @@ export default function BusinessCardCalculator() {
                 }
 
                 return (
-                  <div key={group.product_option_group_uuid} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
-                    <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left mb-1 md:mb-0">
+                  <div key={group.product_option_group_uuid} className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                    <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left mb-1 sm:mb-0">
                       {group.product_option_group_name === "Runsize" ? "Quantity" : group.product_option_group_name}
                     </Label>
                     <Select
@@ -760,8 +760,8 @@ export default function BusinessCardCalculator() {
               })}
 
               <div className="">
-                <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3">
-                  <Label className="text-sm font-semibold text-left mb-1 md:mb-0 pt-2">Ready to Ship In</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3">
+                  <Label className="text-sm font-semibold text-left mb-1 sm:mb-0 pt-2">Ready to Ship In</Label>
                   <div className="space-y-2">
                   {calculating ? (
                     <div className="flex items-center justify-center py-8">
@@ -772,23 +772,17 @@ export default function BusinessCardCalculator() {
                       {prices.map((priceOption: any) => (
                         <div
                           key={priceOption.option_uuid}
-                          className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border-2 py-2 px-3 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50 gap-2"
+                          className="flex items-center justify-between rounded-lg border-2 py-2 px-3 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50"
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} className="h-4 w-4" />
                             <div>
                               <Label htmlFor={priceOption.option_uuid} className="cursor-pointer font-semibold text-sm">
-                                {/* Buy {quantity} pieces */}
-                                 {priceOption.turnaround}
+                                {priceOption.turnaround}
                               </Label>
-                              {/* {priceOption.turnaround && (
-                                <div className="text-sm text-muted-foreground mt-0.5">
-                                  {priceOption.turnaround}
-                                </div>
-                              )} */}
                             </div>
                           </div>
-                          <div className="text-right md:text-right ml-6 md:ml-0">
+                          <div className="text-right">
                             <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 1.1).toFixed(2)}</div>
                             <div className="text-xs text-muted-foreground">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
                             <div className="font-bold text-base">Total: ${priceOption.price.toFixed(2)}</div>
