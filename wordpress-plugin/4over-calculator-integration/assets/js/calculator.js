@@ -155,7 +155,10 @@
             product_id: fouroverCalc.productId,
             price: data.price,
             options: JSON.stringify(data.options),
-            details: data.details
+            details: data.details,
+            front_file: $('#fourover-front-file').val() || '',
+            back_file: $('#fourover-back-file').val() || '',
+            upload_later: $('#fourover-upload-later').val() || ''
         };
 
         $.ajax({
@@ -246,6 +249,139 @@
                 }, '*');
             }, 1500);
         }
+    });
+
+    // Upload File Drawer Functionality
+    let frontFile = null;
+    let backFile = null;
+
+    // Open drawer
+    $('#fourover-upload-file-btn').on('click', function() {
+        $('#fourover-upload-drawer').fadeIn(300);
+        $('body').css('overflow', 'hidden');
+    });
+
+    // Close drawer
+    $('.fourover-drawer-close, .fourover-drawer-overlay').on('click', function() {
+        $('#fourover-upload-drawer').fadeOut(300);
+        $('body').css('overflow', '');
+    });
+
+    // Device upload buttons
+    $('.fourover-device-upload').on('click', function() {
+        const target = $(this).data('target');
+        $(`#fourover-${target}-upload`).click();
+    });
+
+    // File input change handlers
+    $('#fourover-front-upload').on('change', function(e) {
+        handleFileSelect(e.target.files[0], 'front');
+    });
+
+    $('#fourover-back-upload').on('change', function(e) {
+        handleFileSelect(e.target.files[0], 'back');
+    });
+
+    // Drag and drop
+    $('.fourover-upload-area').on('dragover', function(e) {
+        e.preventDefault();
+        $(this).css('border-color', '#4cae4c');
+    });
+
+    $('.fourover-upload-area').on('dragleave', function(e) {
+        e.preventDefault();
+        $(this).css('border-color', '#ccc');
+    });
+
+    $('.fourover-upload-area').on('drop', function(e) {
+        e.preventDefault();
+        $(this).css('border-color', '#ccc');
+        const side = $(this).data('side');
+        const file = e.originalEvent.dataTransfer.files[0];
+        handleFileSelect(file, side);
+    });
+
+    // Handle file selection
+    function handleFileSelect(file, side) {
+        if (!file) return;
+
+        console.log(`File selected for ${side}:`, file.name);
+
+        // Store file
+        if (side === 'front') {
+            frontFile = file;
+        } else {
+            backFile = file;
+        }
+
+        // Update UI
+        const $area = $(`.fourover-upload-area[data-side="${side}"]`);
+        $area.find('.fourover-upload-placeholder').hide();
+        $area.find('.fourover-file-info').show();
+        $area.find('.fourover-file-name').text(file.name);
+
+        // Store file name in hidden field
+        $(`#fourover-${side}-file`).val(file.name);
+
+        // Enable Add to Cart if front file is uploaded
+        updateDrawerAddToCartButton();
+    }
+
+    // Remove file
+    $('.fourover-remove-file').on('click', function() {
+        const side = $(this).data('side');
+
+        if (side === 'front') {
+            frontFile = null;
+        } else {
+            backFile = null;
+        }
+
+        // Reset UI
+        const $area = $(`.fourover-upload-area[data-side="${side}"]`);
+        $area.find('.fourover-upload-placeholder').show();
+        $area.find('.fourover-file-info').hide();
+        $(`#fourover-${side}-upload`).val('');
+        $(`#fourover-${side}-file`).val('');
+
+        // Update button state
+        updateDrawerAddToCartButton();
+    });
+
+    // Update drawer Add to Cart button state
+    function updateDrawerAddToCartButton() {
+        if (frontFile) {
+            $('#fourover-drawer-add-to-cart').prop('disabled', false);
+        } else {
+            $('#fourover-drawer-add-to-cart').prop('disabled', true);
+        }
+    }
+
+    // Drawer Add to Cart
+    $('#fourover-drawer-add-to-cart').on('click', function() {
+        console.log('Adding to cart with files:', {front: frontFile, back: backFile});
+
+        // Close drawer
+        $('#fourover-upload-drawer').fadeOut(300);
+        $('body').css('overflow', '');
+
+        // Add to cart via main button
+        addToCartViaAjax(calculatorData);
+    });
+
+    // Upload Later
+    $('#fourover-upload-later-btn').on('click', function() {
+        console.log('Upload later clicked');
+
+        // Mark as upload later
+        $('#fourover-upload-later').val('yes');
+
+        // Close drawer
+        $('#fourover-upload-drawer').fadeOut(300);
+        $('body').css('overflow', '');
+
+        // Add to cart via main button
+        addToCartViaAjax(calculatorData);
     });
 
 })(jQuery);

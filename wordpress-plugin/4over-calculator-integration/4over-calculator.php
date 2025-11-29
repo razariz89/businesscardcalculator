@@ -146,23 +146,107 @@ class FourOver_Calculator_Integration {
             <input type="hidden" id="fourover-calculated-price" name="fourover_price" value="" />
             <input type="hidden" id="fourover-product-details" name="fourover_details" value="" />
 
+            <input type="hidden" id="fourover-front-file" name="fourover_front_file" value="" />
+            <input type="hidden" id="fourover-back-file" name="fourover_back_file" value="" />
+            <input type="hidden" id="fourover-upload-later" name="fourover_upload_later" value="" />
+
             <div class="fourover-cart-actions" style="display: block !important;">
+                <button type="button" id="fourover-upload-file-btn" class="button" style="display: block !important; width: 100% !important; margin-bottom: 10px;">
+                    <?php _e('Upload Your File', '4over-calc'); ?>
+                </button>
                 <button type="button" id="fourover-add-to-cart-btn" class="single_add_to_cart_button button alt" disabled style="display: block !important; width: 100% !important;">
                     <?php _e('Add to Cart', '4over-calc'); ?>
                 </button>
-                <!-- <div id="fourover-price-display" class="fourover-price" style="display: inline-block !important;">
-                    <span class="price-label"><?php _e('Price:', '4over-calc'); ?></span>
-                    <span class="price-amount">--</span>
-                </div> -->
+            </div>
+
+            <!-- Upload File Drawer/Modal -->
+            <div id="fourover-upload-drawer" class="fourover-upload-drawer" style="display: none;">
+                <div class="fourover-drawer-overlay"></div>
+                <div class="fourover-drawer-content">
+                    <div class="fourover-drawer-header">
+                        <h3><?php _e('Upload Artwork', '4over-calc'); ?></h3>
+                        <button type="button" class="fourover-drawer-close">&times;</button>
+                    </div>
+                    <div class="fourover-drawer-body">
+                        <!-- Front Side Upload -->
+                        <div class="fourover-upload-section">
+                            <div class="fourover-upload-number">1</div>
+                            <h4><?php _e('Front Side Artwork:', '4over-calc'); ?></h4>
+                            <div class="fourover-upload-area" data-side="front">
+                                <div class="fourover-upload-placeholder">
+                                    <p><?php _e('Drag and drop a file here for easy upload', '4over-calc'); ?></p>
+                                    <p class="fourover-upload-or"><?php _e('OR Upload From', '4over-calc'); ?></p>
+                                    <input type="file" id="fourover-front-upload" accept=".pdf,.ai,.psd,.png,.jpg,.jpeg" style="display: none;">
+                                    <button type="button" class="fourover-device-upload" data-target="front">
+                                        <span class="dashicons dashicons-desktop"></span> <?php _e('Device', '4over-calc'); ?>
+                                    </button>
+                                </div>
+                                <div class="fourover-file-info" style="display: none;">
+                                    <span class="fourover-file-name"></span>
+                                    <button type="button" class="fourover-remove-file" data-side="front">&times;</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Back Side Upload -->
+                        <div class="fourover-upload-section">
+                            <div class="fourover-upload-number">2</div>
+                            <h4><?php _e('Back Side Artwork:', '4over-calc'); ?></h4>
+                            <div class="fourover-upload-area" data-side="back">
+                                <div class="fourover-upload-placeholder">
+                                    <p><?php _e('Drag and drop a file here for easy upload', '4over-calc'); ?></p>
+                                    <p class="fourover-upload-or"><?php _e('OR Upload From', '4over-calc'); ?></p>
+                                    <input type="file" id="fourover-back-upload" accept=".pdf,.ai,.psd,.png,.jpg,.jpeg" style="display: none;">
+                                    <button type="button" class="fourover-device-upload" data-target="back">
+                                        <span class="dashicons dashicons-desktop"></span> <?php _e('Device', '4over-calc'); ?>
+                                    </button>
+                                </div>
+                                <div class="fourover-file-info" style="display: none;">
+                                    <span class="fourover-file-name"></span>
+                                    <button type="button" class="fourover-remove-file" data-side="back">&times;</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Drawer Actions -->
+                        <div class="fourover-drawer-actions">
+                            <button type="button" id="fourover-drawer-add-to-cart" class="button alt" disabled>
+                                <?php _e('Add to Cart', '4over-calc'); ?>
+                            </button>
+                            <p class="fourover-drawer-divider"><?php _e("Don't have your files ready?", '4over-calc'); ?></p>
+                            <button type="button" id="fourover-upload-later-btn" class="button">
+                                <?php _e('Upload Later', '4over-calc'); ?>
+                            </button>
+                        </div>
+
+                        <!-- BE PREPARED Section -->
+                        <div class="fourover-be-prepared">
+                            <h3><?php _e('BE PREPARED', '4over-calc'); ?></h3>
+
+                            <h4><?php _e('Accepted File Formats', '4over-calc'); ?></h4>
+                            <p><?php _e('PDF is the preferred file format. We will also accept files formatted as AI, DOC, DOCX, EPS, JPG, JPEG, PNG, PSD, PUB, TIF, TIFF, PPT, PPTX, TXT, CSV, BMP, GIF, SVG, XLSX, XLS and ZIP.', '4over-calc'); ?></p>
+
+                            <h4><?php _e('Artwork Requirements', '4over-calc'); ?></h4>
+                            <p><?php _e('For optimal results, we recommend creating artwork in CMYK color mode, at 300 dpi resolution and including a .125" bleed on each side.', '4over-calc'); ?></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <style>
             .fourover-calculator-wrapper {
                margin: 0px 0 10px;
+               width: 100% !important;
+               max-width: 100% !important;
                 /*  padding: 20px;
                 background: #f9f9f9;
                 border-radius: 8px; */
+            }
+
+            #fourover-calculator-iframe-wrapper {
+                width: 100% !important;
+                max-width: 100% !important;
             }
 
             .fourover-calculator-wrapper h3 {
@@ -243,6 +327,181 @@ class FourOver_Calculator_Integration {
             #fourover-calculator-iframe {
                 /* Note: We'll hide elements inside iframe via postMessage to the calculator app */
             }
+
+            /* Upload Drawer Styles */
+            .fourover-upload-drawer {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 999999;
+            }
+            .fourover-drawer-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+            }
+            .fourover-drawer-content {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                max-width: 500px;
+                background: white;
+                box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+                overflow-y: auto;
+                animation: slideIn 0.3s ease-out;
+            }
+            @keyframes slideIn {
+                from { transform: translateX(100%); }
+                to { transform: translateX(0); }
+            }
+            .fourover-drawer-header {
+                padding: 20px;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .fourover-drawer-header h3 {
+                margin: 0;
+                font-size: 24px;
+            }
+            .fourover-drawer-close {
+                background: none;
+                border: none;
+                font-size: 30px;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                line-height: 1;
+            }
+            .fourover-drawer-body {
+                padding: 20px;
+            }
+            .fourover-upload-section {
+                margin-bottom: 30px;
+                position: relative;
+            }
+            .fourover-upload-number {
+                position: absolute;
+                top: -10px;
+                left: 0;
+                width: 30px;
+                height: 30px;
+                background: #666;
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+            .fourover-upload-section h4 {
+                margin: 0 0 15px 40px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            .fourover-upload-area {
+                border: 2px dashed #ccc;
+                border-radius: 8px;
+                padding: 30px;
+                text-align: center;
+                background: #f9f9f9;
+            }
+            .fourover-upload-placeholder p {
+                margin: 10px 0;
+                color: #666;
+            }
+            .fourover-upload-or {
+                font-size: 14px;
+                font-weight: bold;
+                margin: 15px 0 !important;
+            }
+            .fourover-device-upload {
+                background: #5cb85c;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .fourover-device-upload:hover {
+                background: #4cae4c;
+            }
+            .fourover-file-info {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #e8f5e9;
+                padding: 10px 15px;
+                border-radius: 4px;
+            }
+            .fourover-remove-file {
+                background: #f44336;
+                color: white;
+                border: none;
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 18px;
+                line-height: 1;
+            }
+            .fourover-drawer-actions {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e0e0e0;
+            }
+            .fourover-drawer-actions .button {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            .fourover-drawer-divider {
+                text-align: center;
+                margin: 20px 0;
+                color: #666;
+            }
+            .fourover-be-prepared {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e0e0e0;
+            }
+            .fourover-be-prepared h3 {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                color: #333;
+            }
+            .fourover-be-prepared h4 {
+                font-size: 14px;
+                font-weight: bold;
+                margin: 15px 0 8px 0;
+                color: #555;
+            }
+            .fourover-be-prepared p {
+                font-size: 13px;
+                line-height: 1.6;
+                color: #666;
+                margin-bottom: 10px;
+            }
+            @media (max-width: 768px) {
+                .fourover-drawer-content {
+                    max-width: 100%;
+                }
+            }
         </style>
         <?php
     }
@@ -288,6 +547,9 @@ class FourOver_Calculator_Integration {
         $price = isset($_POST['price']) ? floatval($_POST['price']) : 0;
         $options = isset($_POST['options']) ? json_decode(stripslashes($_POST['options']), true) : array();
         $details = isset($_POST['details']) ? sanitize_text_field($_POST['details']) : '';
+        $front_file = isset($_POST['front_file']) ? sanitize_text_field($_POST['front_file']) : '';
+        $back_file = isset($_POST['back_file']) ? sanitize_text_field($_POST['back_file']) : '';
+        $upload_later = isset($_POST['upload_later']) ? sanitize_text_field($_POST['upload_later']) : '';
 
         if (!$product_id || !$price) {
             wp_send_json_error(array('message' => 'Invalid product or price'));
@@ -301,6 +563,25 @@ class FourOver_Calculator_Integration {
             return;
         }
 
+        // Prepare cart item data
+        $cart_item_data = array(
+            'fourover_custom_price' => $price,
+            'fourover_options' => $options,
+            'fourover_details' => $details,
+            'unique_key' => md5(microtime() . rand())
+        );
+
+        // Add file information if provided
+        if (!empty($front_file)) {
+            $cart_item_data['fourover_front_file'] = $front_file;
+        }
+        if (!empty($back_file)) {
+            $cart_item_data['fourover_back_file'] = $back_file;
+        }
+        if (!empty($upload_later)) {
+            $cart_item_data['fourover_upload_later'] = $upload_later;
+        }
+
         // Add to cart with quantity = 1
         // The price from calculator already includes the total for all quantity
         $cart_item_key = WC()->cart->add_to_cart(
@@ -308,12 +589,7 @@ class FourOver_Calculator_Integration {
             1,  // Always 1 - price already includes quantity cost
             0,  // No variation
             array(),  // No variation attributes
-            array(
-                'fourover_custom_price' => $price,
-                'fourover_options' => $options,
-                'fourover_details' => $details,
-                'unique_key' => md5(microtime() . rand())
-            )
+            $cart_item_data
         );
 
         if ($cart_item_key) {
@@ -674,6 +950,31 @@ function fourover_get_item_data($item_data, $cart_item) {
         );
     }
 
+    // Display uploaded files
+    if (isset($cart_item['fourover_front_file']) && !empty($cart_item['fourover_front_file'])) {
+        $item_data[] = array(
+            'name' => __('Front Side Artwork', '4over-calc'),
+            'value' => '📄 ' . $cart_item['fourover_front_file'],
+            'display' => ''
+        );
+    }
+
+    if (isset($cart_item['fourover_back_file']) && !empty($cart_item['fourover_back_file'])) {
+        $item_data[] = array(
+            'name' => __('Back Side Artwork', '4over-calc'),
+            'value' => '📄 ' . $cart_item['fourover_back_file'],
+            'display' => ''
+        );
+    }
+
+    if (isset($cart_item['fourover_upload_later']) && $cart_item['fourover_upload_later'] === 'yes') {
+        $item_data[] = array(
+            'name' => __('Artwork', '4over-calc'),
+            'value' => '⏰ Upload Later',
+            'display' => ''
+        );
+    }
+
     return $item_data;
 }
 
@@ -706,6 +1007,19 @@ function fourover_checkout_create_order_line_item($item, $cart_item_key, $values
     // Save configuration summary
     if (isset($values['fourover_details'])) {
         $item->add_meta_data('Configuration Summary', $values['fourover_details'], true);
+    }
+
+    // Save file information
+    if (isset($values['fourover_front_file']) && !empty($values['fourover_front_file'])) {
+        $item->add_meta_data('Front Side Artwork', '📄 ' . $values['fourover_front_file'], true);
+    }
+
+    if (isset($values['fourover_back_file']) && !empty($values['fourover_back_file'])) {
+        $item->add_meta_data('Back Side Artwork', '📄 ' . $values['fourover_back_file'], true);
+    }
+
+    if (isset($values['fourover_upload_later']) && $values['fourover_upload_later'] === 'yes') {
+        $item->add_meta_data('Artwork', '⏰ Upload Later', true);
     }
 }
 
