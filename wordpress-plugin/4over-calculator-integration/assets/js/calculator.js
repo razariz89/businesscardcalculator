@@ -96,25 +96,38 @@
 
     let lastHeight = 0;
     let resizeTimeout = null;
+    let updateCount = 0;
+    const MAX_UPDATES = 10; // Prevent infinite loops
 
     function handleIframeResize(data) {
-        if (data.height && data.height !== lastHeight) {
-            console.log('📏 Resizing iframe to height:', data.height);
+        if (data.height) {
+            // Only update if height changed by more than 10px to avoid micro-adjustments
+            const heightDiff = Math.abs(data.height - lastHeight);
 
-            // Clear any pending resize
-            if (resizeTimeout) {
-                clearTimeout(resizeTimeout);
+            if (heightDiff > 10 && updateCount < MAX_UPDATES) {
+                console.log('📏 Resizing iframe to height:', data.height, 'diff:', heightDiff);
+
+                // Clear any pending resize
+                if (resizeTimeout) {
+                    clearTimeout(resizeTimeout);
+                }
+
+                // Debounce the resize to avoid jank
+                resizeTimeout = setTimeout(function() {
+                    $('#fourover-calculator-iframe').css({
+                        'height': data.height + 'px',
+                        'max-height': '1500px', // Prevent excessive height
+                        'overflow': 'hidden'
+                    });
+                    lastHeight = data.height;
+                    updateCount++;
+
+                    // Reset counter after 2 seconds of no updates
+                    setTimeout(function() {
+                        updateCount = 0;
+                    }, 2000);
+                }, 100);
             }
-
-            // Debounce the resize to avoid jank
-            resizeTimeout = setTimeout(function() {
-                $('#fourover-calculator-iframe').css({
-                    'height': data.height + 'px',
-                    'min-height': 'auto',
-                    'transition': 'height 0.2s ease-in-out'
-                });
-                lastHeight = data.height;
-            }, 50);
         }
     }
 
