@@ -94,13 +94,27 @@
         addToCartViaAjax(cartData);
     }
 
+    let lastHeight = 0;
+    let resizeTimeout = null;
+
     function handleIframeResize(data) {
-        if (data.height) {
+        if (data.height && data.height !== lastHeight) {
             console.log('📏 Resizing iframe to height:', data.height);
-            $('#fourover-calculator-iframe').css({
-                'height': data.height + 'px',
-                'min-height': 'auto'
-            });
+
+            // Clear any pending resize
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
+            }
+
+            // Debounce the resize to avoid jank
+            resizeTimeout = setTimeout(function() {
+                $('#fourover-calculator-iframe').css({
+                    'height': data.height + 'px',
+                    'min-height': 'auto',
+                    'transition': 'height 0.2s ease-in-out'
+                });
+                lastHeight = data.height;
+            }, 50);
         }
     }
 

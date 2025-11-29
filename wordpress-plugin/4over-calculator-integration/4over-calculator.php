@@ -173,6 +173,16 @@ class FourOver_Calculator_Integration {
             #fourover-calculator-iframe {
                 /* box-shadow: 0 2px 8px rgba(0,0,0,0.1); */
             }
+
+            /* Mobile responsive */
+            @media (max-width: 768px) {
+                .fourover-calculator-wrapper {
+                    margin: 0 -15px 10px -15px;
+                }
+                #fourover-calculator-iframe {
+                    border-radius: 0 !important;
+                }
+            }
             .fourover-cart-actions {
                 margin-top: 20px;
                 display: flex;

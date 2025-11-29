@@ -126,33 +126,52 @@ export default function BusinessCardCalculator() {
     }
   }, [embeddedMode, optionGroups])
 
-  // Send iframe height to WordPress for dynamic resizing
+  // Send iframe height to WordPress for dynamic resizing using ResizeObserver
   useEffect(() => {
     if (embeddedMode) {
       const sendHeight = () => {
-        const height = document.documentElement.scrollHeight
+        // Get the actual content height
+        const body = document.body
+        const html = document.documentElement
+        const height = Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.clientHeight,
+          html.scrollHeight,
+          html.offsetHeight
+        )
+
         console.log("[v0] Sending height to parent:", height)
         window.parent.postMessage({
           type: "RESIZE_IFRAME",
-          height: height
+          height: height + 20 // Add small buffer
         }, "*")
       }
 
-      // Send height on mount and when content changes
+      // Use ResizeObserver for more reliable height tracking
+      const resizeObserver = new ResizeObserver(() => {
+        sendHeight()
+      })
+
+      // Observe the body element
+      resizeObserver.observe(document.body)
+
+      // Initial send
       sendHeight()
 
-      // Also send after delays to account for animations/loading
-      const timer1 = setTimeout(sendHeight, 300)
-      const timer2 = setTimeout(sendHeight, 800)
-      const timer3 = setTimeout(sendHeight, 1500)
+      // Also send after delays to ensure everything is loaded
+      const timer1 = setTimeout(sendHeight, 500)
+      const timer2 = setTimeout(sendHeight, 1000)
+      const timer3 = setTimeout(sendHeight, 2000)
 
       return () => {
+        resizeObserver.disconnect()
         clearTimeout(timer1)
         clearTimeout(timer2)
         clearTimeout(timer3)
       }
     }
-  }, [embeddedMode, prices, selectedTurnaround, optionGroups, calculating, optionGroupsLoading])
+  }, [embeddedMode])
 
   // Send calculator data to WordPress when price or options change
   useEffect(() => {
@@ -636,12 +655,12 @@ export default function BusinessCardCalculator() {
   const selectedProduct = filteredProducts.find((p) => p.product_uuid === productId)
 
   return (
-    <div className="w-full max-w-4xl mx-auto ">
+    <div className="w-full max-w-4xl mx-auto px-4 md:px-0">
       <div className="space-y-4">
               {/* Hide category dropdown in embedded mode when category is passed via URL */}
               {categories.length > 0 && !embeddedMode && (
-                <div className="grid grid-cols-[180px_1fr] gap-3 items-center">
-                  <Label htmlFor="category" className="text-sm font-semibold text-left">Category</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
+                  <Label htmlFor="category" className="text-sm font-semibold text-left mb-1 md:mb-0">Category</Label>
                   <Select value={categoryId} onValueChange={setCategoryId}>
                     <SelectTrigger id="category" className="h-10 text-sm">
                       <SelectValue placeholder="Select category" />
@@ -658,8 +677,8 @@ export default function BusinessCardCalculator() {
               )}
 
               {/* Size Selection */}
-              <div className="grid grid-cols-[180px_1fr] gap-3 items-center">
-                <Label htmlFor="size" className="text-sm font-semibold text-left">Size</Label>
+              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
+                <Label htmlFor="size" className="text-sm font-semibold text-left mb-1 md:mb-0">Size</Label>
                 {sizes.length > 0 ? (
                   <Select
                     value={selectedSize}
@@ -687,8 +706,8 @@ export default function BusinessCardCalculator() {
               </div>
 
               {/* Product Selection */}
-              <div className="grid grid-cols-[180px_1fr] gap-3 items-center">
-                <Label htmlFor="product" className="text-sm font-semibold text-left">Product</Label>
+              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
+                <Label htmlFor="product" className="text-sm font-semibold text-left mb-1 md:mb-0">Product</Label>
                 {productsLoading ? (
                   <div className="h-10 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -729,8 +748,8 @@ export default function BusinessCardCalculator() {
                 }
 
                 return (
-                  <div key={group.product_option_group_uuid} className="grid grid-cols-[180px_1fr] gap-3 items-center">
-                    <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left">
+                  <div key={group.product_option_group_uuid} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3 items-center">
+                    <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left mb-1 md:mb-0">
                       {group.product_option_group_name === "Runsize" ? "Quantity" : group.product_option_group_name}
                     </Label>
                     <Select
@@ -753,8 +772,8 @@ export default function BusinessCardCalculator() {
               })}
 
               <div className="">
-                <div className="grid grid-cols-[180px_1fr] gap-3">
-                  <Label className="text-sm font-semibold text-left pt-2">Ready to Ship In</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-2 md:gap-3">
+                  <Label className="text-sm font-semibold text-left mb-1 md:mb-0 pt-2">Ready to Ship In</Label>
                   <div className="space-y-2">
                   {calculating ? (
                     <div className="flex items-center justify-center py-8">
@@ -765,7 +784,7 @@ export default function BusinessCardCalculator() {
                       {prices.map((priceOption: any) => (
                         <div
                           key={priceOption.option_uuid}
-                          className="flex items-center justify-between rounded-lg border-2 py-1.5 px-3 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border-2 py-2 px-3 hover:border-blue-500 cursor-pointer transition-all data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-50 gap-2"
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value={priceOption.option_uuid} id={priceOption.option_uuid} className="h-4 w-4" />
@@ -781,7 +800,7 @@ export default function BusinessCardCalculator() {
                               )} */}
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right sm:text-right ml-6 sm:ml-0">
                             <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 1.1).toFixed(2)}</div>
                             <div className="text-xs text-muted-foreground">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
                             <div className="font-bold text-base">Total: ${priceOption.price.toFixed(2)}</div>
