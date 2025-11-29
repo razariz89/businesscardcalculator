@@ -96,7 +96,11 @@
 
     function handleIframeResize(data) {
         if (data.height) {
-            $('#fourover-calculator-iframe').css('min-height', data.height + 'px');
+            console.log('📏 Resizing iframe to height:', data.height);
+            $('#fourover-calculator-iframe').css({
+                'height': data.height + 'px',
+                'min-height': 'auto'
+            });
         }
     }
 

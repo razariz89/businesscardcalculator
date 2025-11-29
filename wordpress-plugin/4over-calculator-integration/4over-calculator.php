@@ -136,7 +136,7 @@ class FourOver_Calculator_Integration {
                 <iframe
                     id="fourover-calculator-iframe"
                     src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($category_id) . '&embedded=true'); ?>"
-                    style="width: 100% !important; min-height: 500px !important; height: auto !important; border: none !important; border-radius: 8px !important; display: block !important;"
+                    style="width: 100% !important; min-height: 400px !important; height: auto !important; border: none !important; display: block !important; overflow: hidden !important;"
                     frameborder="0"
                     scrolling="no"
                 ></iframe>
@@ -181,13 +181,12 @@ class FourOver_Calculator_Integration {
                 flex-wrap: wrap;
             }
             #fourover-add-to-cart-btn {
-                font-size: 16px;
+                /* font-size: 16px;
                 padding: 12px 30px;
                 cursor: pointer;
-                background-color: #0071a1;
                 color: white;
                 border: none;
-                border-radius: 4px;
+                border-radius: 4px; */
                 line-height: 1;
             }
             #fourover-add-to-cart-btn:hover:not(:disabled) {

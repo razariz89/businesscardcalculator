@@ -131,6 +131,7 @@ export default function BusinessCardCalculator() {
     if (embeddedMode) {
       const sendHeight = () => {
         const height = document.documentElement.scrollHeight
+        console.log("[v0] Sending height to parent:", height)
         window.parent.postMessage({
           type: "RESIZE_IFRAME",
           height: height
@@ -140,11 +141,18 @@ export default function BusinessCardCalculator() {
       // Send height on mount and when content changes
       sendHeight()
 
-      // Also send after a short delay to account for animations/loading
-      const timer = setTimeout(sendHeight, 500)
-      return () => clearTimeout(timer)
+      // Also send after delays to account for animations/loading
+      const timer1 = setTimeout(sendHeight, 300)
+      const timer2 = setTimeout(sendHeight, 800)
+      const timer3 = setTimeout(sendHeight, 1500)
+
+      return () => {
+        clearTimeout(timer1)
+        clearTimeout(timer2)
+        clearTimeout(timer3)
+      }
     }
-  }, [embeddedMode, prices, selectedTurnaround, optionGroups])
+  }, [embeddedMode, prices, selectedTurnaround, optionGroups, calculating, optionGroupsLoading])
 
   // Send calculator data to WordPress when price or options change
   useEffect(() => {
@@ -744,7 +752,7 @@ export default function BusinessCardCalculator() {
                 )
               })}
 
-              <div className="bg-gray-50 p-4 rounded-lg -mx-4">
+              <div className="">
                 <div className="grid grid-cols-[180px_1fr] gap-3">
                   <Label className="text-sm font-semibold text-left pt-2">Ready to Ship In</Label>
                   <div className="space-y-2">
