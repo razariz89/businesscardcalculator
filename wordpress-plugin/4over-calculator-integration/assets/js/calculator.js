@@ -314,17 +314,80 @@
             backFile = file;
         }
 
-        // Update UI
+        // Update UI to show uploading state
         const $area = $(`.fourover-upload-area[data-side="${side}"]`);
         $area.find('.fourover-upload-placeholder').hide();
         $area.find('.fourover-file-info').show();
-        $area.find('.fourover-file-name').text(file.name);
+        $area.find('.fourover-file-name').text('Uploading: ' + file.name);
 
-        // Store file name in hidden field
-        $(`#fourover-${side}-file`).val(file.name);
+        // Disable buttons while uploading
+        $('#fourover-drawer-add-to-cart').prop('disabled', true);
 
-        // Enable Add to Cart if front file is uploaded
-        updateDrawerAddToCartButton();
+        // Upload file to server
+        uploadFileToServer(file, side);
+    }
+
+    // Upload file to server via AJAX
+    function uploadFileToServer(file, side) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('action', 'fourover_upload_file');
+        formData.append('nonce', fouroverCalc.nonce);
+        formData.append('side', side);
+
+        $.ajax({
+            url: fouroverCalc.ajaxUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    console.log(`✅ ${side} file uploaded successfully:`, response.data);
+
+                    // Update UI with uploaded file info
+                    const $area = $(`.fourover-upload-area[data-side="${side}"]`);
+                    $area.find('.fourover-file-name').text(response.data.file_name);
+
+                    // Store file URL in hidden field
+                    $(`#fourover-${side}-file`).val(response.data.file_url);
+
+                    // Enable Add to Cart if front file is uploaded
+                    updateDrawerAddToCartButton();
+                } else {
+                    console.error('❌ File upload failed:', response.data.message);
+                    alert('File upload failed: ' + response.data.message);
+
+                    // Reset UI on error
+                    const $area = $(`.fourover-upload-area[data-side="${side}"]`);
+                    $area.find('.fourover-upload-placeholder').show();
+                    $area.find('.fourover-file-info').hide();
+
+                    // Clear file reference
+                    if (side === 'front') {
+                        frontFile = null;
+                    } else {
+                        backFile = null;
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('❌ AJAX error during file upload:', error);
+                alert('Error uploading file. Please try again.');
+
+                // Reset UI on error
+                const $area = $(`.fourover-upload-area[data-side="${side}"]`);
+                $area.find('.fourover-upload-placeholder').show();
+                $area.find('.fourover-file-info').hide();
+
+                // Clear file reference
+                if (side === 'front') {
+                    frontFile = null;
+                } else {
+                    backFile = null;
+                }
+            }
+        });
     }
 
     // Remove file

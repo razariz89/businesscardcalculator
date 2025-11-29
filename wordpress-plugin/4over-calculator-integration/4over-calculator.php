@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: 4over Calculator Integration
  * Plugin URI: https://v0-businesscardcalculator.vercel.app/
@@ -23,18 +24,21 @@ define('FOUROVER_CALC_VERSION', '1.0.0');
 define('FOUROVER_CALC_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FOUROVER_CALC_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-class FourOver_Calculator_Integration {
+class FourOver_Calculator_Integration
+{
 
     private static $instance = null;
 
-    public static function get_instance() {
+    public static function get_instance()
+    {
         if (null === self::$instance) {
             self::$instance = new self();
         }
         return self::$instance;
     }
 
-    private function __construct() {
+    private function __construct()
+    {
         // Check if WooCommerce is active
         if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
             add_action('admin_notices', array($this, 'woocommerce_missing_notice'));
@@ -44,7 +48,8 @@ class FourOver_Calculator_Integration {
         $this->init_hooks();
     }
 
-    private function init_hooks() {
+    private function init_hooks()
+    {
         // Admin hooks
         add_action('woocommerce_product_options_general_product_data', array($this, 'add_category_id_field'));
         add_action('woocommerce_process_product_meta', array($this, 'save_category_id_field'));
@@ -57,6 +62,10 @@ class FourOver_Calculator_Integration {
         add_action('wp_ajax_fourover_add_to_cart', array($this, 'ajax_add_to_cart'));
         add_action('wp_ajax_nopriv_fourover_add_to_cart', array($this, 'ajax_add_to_cart'));
 
+        // AJAX hooks for file upload
+        add_action('wp_ajax_fourover_upload_file', array($this, 'ajax_upload_file'));
+        add_action('wp_ajax_nopriv_fourover_upload_file', array($this, 'ajax_upload_file'));
+
         // Admin settings
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
@@ -68,18 +77,20 @@ class FourOver_Calculator_Integration {
         add_action('wp_head', array($this, 'hide_cart_quantity_controls'));
     }
 
-    public function woocommerce_missing_notice() {
-        ?>
+    public function woocommerce_missing_notice()
+    {
+?>
         <div class="error">
             <p><?php _e('4over Calculator Integration requires WooCommerce to be installed and active.', '4over-calc'); ?></p>
         </div>
-        <?php
+    <?php
     }
 
     /**
      * Add custom field for 4over Category ID in product admin
      */
-    public function add_category_id_field() {
+    public function add_category_id_field()
+    {
         global $post;
 
         echo '<div class="options_group">';
@@ -106,7 +117,8 @@ class FourOver_Calculator_Integration {
     /**
      * Save custom field
      */
-    public function save_category_id_field($post_id) {
+    public function save_category_id_field($post_id)
+    {
         $category_id = isset($_POST['_4over_category_id']) ? sanitize_text_field($_POST['_4over_category_id']) : '';
         update_post_meta($post_id, '_4over_category_id', $category_id);
 
@@ -117,7 +129,8 @@ class FourOver_Calculator_Integration {
     /**
      * Display calculator on product page
      */
-    public function display_calculator() {
+    public function display_calculator()
+    {
         global $post;
 
         $category_id = get_post_meta($post->ID, '_4over_category_id', true);
@@ -129,7 +142,7 @@ class FourOver_Calculator_Integration {
 
         $calculator_url = get_option('fourover_calculator_url', 'https://businesscardcalculator.vercel.app');
 
-        ?>
+    ?>
         <div id="fourover-calculator-container" class="fourover-calculator-wrapper" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
             <!-- <h3 style="display: block !important;"><?php _e('Configure Your Product', '4over-calc'); ?></h3> -->
             <div id="fourover-calculator-iframe-wrapper" style="display: block !important;">
@@ -138,8 +151,7 @@ class FourOver_Calculator_Integration {
                     src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($category_id) . '&embedded=true'); ?>"
                     style="width: 100% !important; min-height: 400px !important; height: auto !important; border: none !important; display: block !important; overflow: hidden !important;"
                     frameborder="0"
-                    scrolling="no"
-                ></iframe>
+                    scrolling="no"></iframe>
             </div>
 
             <input type="hidden" id="fourover-selected-options" name="fourover_options" value="" />
@@ -238,9 +250,9 @@ class FourOver_Calculator_Integration {
 
         <style>
             .fourover-calculator-wrapper {
-               margin: 0px 0 10px;
-               width: 100% !important;
-               max-width: 100% !important;
+                margin: 0px 0 10px;
+                width: 100% !important;
+                max-width: 100% !important;
                 /*  padding: 20px;
                 background: #f9f9f9;
                 border-radius: 8px; */
@@ -256,6 +268,7 @@ class FourOver_Calculator_Integration {
                 margin-bottom: 20px;
                 font-size: 1.5em;
             }
+
             #fourover-calculator-iframe {
                 /* box-shadow: 0 2px 8px rgba(0,0,0,0.1); */
             }
@@ -265,10 +278,12 @@ class FourOver_Calculator_Integration {
                 .fourover-calculator-wrapper {
                     margin: 0 -15px 10px -15px;
                 }
+
                 #fourover-calculator-iframe {
                     border-radius: 0 !important;
                 }
             }
+
             .fourover-cart-actions {
                 margin-top: 20px;
                 display: flex;
@@ -276,6 +291,7 @@ class FourOver_Calculator_Integration {
                 gap: 20px;
                 flex-wrap: wrap;
             }
+
             #fourover-add-to-cart-btn {
                 /* font-size: 16px;
                 padding: 12px 30px;
@@ -285,22 +301,27 @@ class FourOver_Calculator_Integration {
                 border-radius: 4px; */
                 line-height: 1;
             }
+
             #fourover-add-to-cart-btn:hover:not(:disabled) {
                 background-color: #005a87;
             }
+
             #fourover-add-to-cart-btn:disabled {
                 opacity: 0.5;
                 cursor: not-allowed;
                 background-color: #cccccc;
             }
+
             .fourover-price {
                 font-size: 18px;
                 font-weight: bold;
             }
+
             .fourover-price .price-label {
                 color: #666;
                 margin-right: 8px;
             }
+
             .fourover-price .price-amount {
                 color: #77a464;
                 font-size: 24px;
@@ -339,6 +360,7 @@ class FourOver_Calculator_Integration {
                 bottom: 0;
                 z-index: 999999;
             }
+
             .fourover-drawer-overlay {
                 position: absolute;
                 top: 0;
@@ -347,6 +369,7 @@ class FourOver_Calculator_Integration {
                 bottom: 0;
                 background: rgba(0, 0, 0, 0.5);
             }
+
             .fourover-drawer-content {
                 position: absolute;
                 top: 0;
@@ -359,10 +382,17 @@ class FourOver_Calculator_Integration {
                 overflow-y: auto;
                 animation: slideIn 0.3s ease-out;
             }
+
             @keyframes slideIn {
-                from { transform: translateX(100%); }
-                to { transform: translateX(0); }
+                from {
+                    transform: translateX(100%);
+                }
+
+                to {
+                    transform: translateX(0);
+                }
             }
+
             .fourover-drawer-header {
                 padding: 20px;
                 border-bottom: 1px solid #e0e0e0;
@@ -370,10 +400,12 @@ class FourOver_Calculator_Integration {
                 justify-content: space-between;
                 align-items: center;
             }
+
             .fourover-drawer-header h3 {
                 margin: 0;
                 font-size: 24px;
             }
+
             .fourover-drawer-close {
                 background: none;
                 border: none;
@@ -384,13 +416,16 @@ class FourOver_Calculator_Integration {
                 height: 30px;
                 line-height: 1;
             }
+
             .fourover-drawer-body {
                 padding: 20px;
             }
+
             .fourover-upload-section {
                 margin-bottom: 30px;
                 position: relative;
             }
+
             .fourover-upload-number {
                 position: absolute;
                 top: -10px;
@@ -405,11 +440,13 @@ class FourOver_Calculator_Integration {
                 justify-content: center;
                 font-weight: bold;
             }
+
             .fourover-upload-section h4 {
                 margin: 0 0 15px 40px;
                 font-size: 16px;
                 font-weight: bold;
             }
+
             .fourover-upload-area {
                 border: 2px dashed #ccc;
                 border-radius: 8px;
@@ -417,15 +454,18 @@ class FourOver_Calculator_Integration {
                 text-align: center;
                 background: #f9f9f9;
             }
+
             .fourover-upload-placeholder p {
                 margin: 10px 0;
                 color: #666;
             }
+
             .fourover-upload-or {
                 font-size: 14px;
                 font-weight: bold;
                 margin: 15px 0 !important;
             }
+
             .fourover-device-upload {
                 background: #5cb85c;
                 color: white;
@@ -438,9 +478,11 @@ class FourOver_Calculator_Integration {
                 align-items: center;
                 gap: 5px;
             }
+
             .fourover-device-upload:hover {
                 background: #4cae4c;
             }
+
             .fourover-file-info {
                 display: flex;
                 align-items: center;
@@ -449,6 +491,7 @@ class FourOver_Calculator_Integration {
                 padding: 10px 15px;
                 border-radius: 4px;
             }
+
             .fourover-remove-file {
                 background: #f44336;
                 color: white;
@@ -457,26 +500,33 @@ class FourOver_Calculator_Integration {
                 height: 25px;
                 border-radius: 50%;
                 cursor: pointer;
-                font-size: 18px;
-                line-height: 1;
+                font-size: 17px;
+                line-height: .7;
+                padding: 0;
+
             }
+
             .fourover-drawer-actions {
                 margin-top: 30px;
                 padding-top: 20px;
                 border-top: 1px solid #e0e0e0;
             }
+
             .fourover-drawer-actions .button {
                 width: 100%;
                 padding: 12px;
                 font-size: 16px;
                 margin-bottom: 10px;
+                line-height: 1;
             }
+
             .fourover-drawer-divider {
                 text-align: center;
                 margin: 20px 0;
                 color: #666;
                 font-size: 14px;
             }
+
             .fourover-upload-later-link {
                 color: #000;
                 text-decoration: underline;
@@ -485,46 +535,53 @@ class FourOver_Calculator_Integration {
                 display: inline;
                 margin-left: 5px;
             }
+
             .fourover-upload-later-link:hover {
                 color: #333;
                 text-decoration: underline;
             }
+
             .fourover-be-prepared {
                 margin-top: 30px;
                 padding-top: 20px;
                 border-top: 1px solid #e0e0e0;
             }
+
             .fourover-be-prepared h3 {
                 font-size: 18px;
                 font-weight: bold;
                 margin-bottom: 15px;
                 color: #333;
             }
+
             .fourover-be-prepared h4 {
                 font-size: 14px;
                 font-weight: bold;
                 margin: 15px 0 8px 0;
                 color: #555;
             }
+
             .fourover-be-prepared p {
                 font-size: 13px;
                 line-height: 1.6;
                 color: #666;
                 margin-bottom: 10px;
             }
+
             @media (max-width: 768px) {
                 .fourover-drawer-content {
                     max-width: 100%;
                 }
             }
         </style>
-        <?php
+    <?php
     }
 
     /**
      * Enqueue frontend scripts
      */
-    public function enqueue_scripts() {
+    public function enqueue_scripts()
+    {
         if (!is_product()) {
             return;
         }
@@ -555,7 +612,8 @@ class FourOver_Calculator_Integration {
     /**
      * AJAX handler to add configured product to cart
      */
-    public function ajax_add_to_cart() {
+    public function ajax_add_to_cart()
+    {
         check_ajax_referer('fourover_calc_nonce', 'nonce');
 
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
@@ -618,9 +676,82 @@ class FourOver_Calculator_Integration {
     }
 
     /**
+     * AJAX handler for file uploads
+     */
+    public function ajax_upload_file()
+    {
+        check_ajax_referer('fourover_calc_nonce', 'nonce');
+
+        if (!isset($_FILES['file'])) {
+            wp_send_json_error(array('message' => 'No file uploaded'));
+            return;
+        }
+
+        $file = $_FILES['file'];
+        $side = isset($_POST['side']) ? sanitize_text_field($_POST['side']) : 'front';
+
+        // Validate file type
+        $allowed_types = array('pdf', 'ai', 'psd', 'png', 'jpg', 'jpeg', 'eps', 'doc', 'docx', 'zip', 'tif', 'tiff', 'svg', 'gif', 'ppt', 'pptx', 'txt');
+        $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($file_ext, $allowed_types)) {
+            wp_send_json_error(array('message' => 'Invalid file type. Allowed: ' . implode(', ', $allowed_types)));
+            return;
+        }
+
+        // Validate file size (max 50MB)
+        if ($file['size'] > 50 * 1024 * 1024) {
+            wp_send_json_error(array('message' => 'File too large. Maximum size: 50MB'));
+            return;
+        }
+
+        // Include WordPress file handling
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+
+        $upload_overrides = array(
+            'test_form' => false,
+            'mimes' => array(
+                'pdf' => 'application/pdf',
+                'ai' => 'application/postscript',
+                'eps' => 'application/postscript',
+                'psd' => 'image/vnd.adobe.photoshop',
+                'png' => 'image/png',
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'doc' => 'application/msword',
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'zip' => 'application/zip',
+                'tif' => 'image/tiff',
+                'tiff' => 'image/tiff',
+                'svg' => 'image/svg+xml',
+                'gif' => 'image/gif',
+                'ppt' => 'application/vnd.ms-powerpoint',
+                'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'txt' => 'text/plain'
+            )
+        );
+
+        // Upload file
+        $uploaded_file = wp_handle_upload($file, $upload_overrides);
+
+        if (isset($uploaded_file['error'])) {
+            wp_send_json_error(array('message' => $uploaded_file['error']));
+            return;
+        }
+
+        wp_send_json_success(array(
+            'file_url' => $uploaded_file['url'],
+            'file_path' => $uploaded_file['file'],
+            'file_name' => basename($uploaded_file['file']),
+            'side' => $side
+        ));
+    }
+
+    /**
      * Add admin menu
      */
-    public function add_admin_menu() {
+    public function add_admin_menu()
+    {
         add_submenu_page(
             'woocommerce',
             __('4over Calculator Settings', '4over-calc'),
@@ -634,7 +765,8 @@ class FourOver_Calculator_Integration {
     /**
      * Register settings
      */
-    public function register_settings() {
+    public function register_settings()
+    {
         register_setting('fourover_calculator_settings', 'fourover_calculator_url');
         register_setting('fourover_calculator_settings', 'fourover_auto_add_to_cart');
         register_setting('fourover_calculator_settings', 'fourover_hide_default_price');
@@ -643,8 +775,9 @@ class FourOver_Calculator_Integration {
     /**
      * Settings page
      */
-    public function settings_page() {
-        ?>
+    public function settings_page()
+    {
+    ?>
         <div class="wrap">
             <h1><?php _e('4over Calculator Settings', '4over-calc'); ?></h1>
 
@@ -662,8 +795,7 @@ class FourOver_Calculator_Integration {
                                 id="fourover_calculator_url"
                                 name="fourover_calculator_url"
                                 value="<?php echo esc_attr(get_option('fourover_calculator_url', 'https://businesscardcalculator.vercel.app')); ?>"
-                                class="regular-text"
-                            />
+                                class="regular-text" />
                             <p class="description"><?php _e('URL of your hosted 4over calculator application', '4over-calc'); ?></p>
                         </td>
                     </tr>
@@ -678,8 +810,7 @@ class FourOver_Calculator_Integration {
                                 id="fourover_auto_add_to_cart"
                                 name="fourover_auto_add_to_cart"
                                 value="1"
-                                <?php checked(get_option('fourover_auto_add_to_cart'), 1); ?>
-                            />
+                                <?php checked(get_option('fourover_auto_add_to_cart'), 1); ?> />
                             <label for="fourover_auto_add_to_cart"><?php _e('Automatically add to cart when user configures product', '4over-calc'); ?></label>
                         </td>
                     </tr>
@@ -694,8 +825,7 @@ class FourOver_Calculator_Integration {
                                 id="fourover_hide_default_price"
                                 name="fourover_hide_default_price"
                                 value="1"
-                                <?php checked(get_option('fourover_hide_default_price'), 1); ?>
-                            />
+                                <?php checked(get_option('fourover_hide_default_price'), 1); ?> />
                             <label for="fourover_hide_default_price"><?php _e('Hide default WooCommerce price when calculator is active', '4over-calc'); ?></label>
                         </td>
                     </tr>
@@ -720,17 +850,18 @@ class FourOver_Calculator_Integration {
             <p><?php _e('You can also use shortcode to embed calculator anywhere:', '4over-calc'); ?></p>
             <code>[fourover_calculator category_id="YOUR_CATEGORY_ID"]</code>
         </div>
-        <?php
+    <?php
     }
 
     /**
      * Hide cart quantity controls for calculator items
      */
-    public function hide_cart_quantity_controls() {
+    public function hide_cart_quantity_controls()
+    {
         if (!is_cart() && !is_checkout()) {
             return;
         }
-        ?>
+    ?>
         <style type="text/css">
             /* Force hide quantity column - MAXIMUM PRIORITY */
             table.shop_table.cart td.product-quantity,
@@ -788,13 +919,14 @@ class FourOver_Calculator_Integration {
                 setTimeout(hideQuantity, 1000);
             })();
         </script>
-        <?php
+    <?php
     }
 
     /**
      * Shortcode handler
      */
-    public function calculator_shortcode($atts) {
+    public function calculator_shortcode($atts)
+    {
         $atts = shortcode_atts(array(
             'category_id' => '',
             'height' => '680px'
@@ -807,15 +939,14 @@ class FourOver_Calculator_Integration {
         $calculator_url = get_option('fourover_calculator_url', 'https://businesscardcalculator.vercel.app');
 
         ob_start();
-        ?>
+    ?>
         <div class="fourover-calculator-shortcode">
             <iframe
                 src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($atts['category_id']) . '&embedded=true'); ?>"
                 style="width: 100%; min-height: <?php echo esc_attr($atts['height']); ?>; border: none; border-radius: 8px;"
-                frameborder="0"
-            ></iframe>
+                frameborder="0"></iframe>
         </div>
-        <?php
+<?php
         return ob_get_clean();
     }
 }
@@ -825,7 +956,8 @@ add_action('plugins_loaded', array('FourOver_Calculator_Integration', 'get_insta
 
 // Add custom price persistence
 add_filter('woocommerce_add_cart_item_data', 'fourover_add_cart_item_data', 10, 3);
-function fourover_add_cart_item_data($cart_item_data, $product_id, $variation_id) {
+function fourover_add_cart_item_data($cart_item_data, $product_id, $variation_id)
+{
     if (isset($_POST['fourover_price']) && !empty($_POST['fourover_price'])) {
         $cart_item_data['fourover_custom_price'] = floatval($_POST['fourover_price']);
     }
@@ -840,7 +972,8 @@ function fourover_add_cart_item_data($cart_item_data, $product_id, $variation_id
 
 // Apply custom price to cart AND FORCE QUANTITY TO 1
 add_action('woocommerce_before_calculate_totals', 'fourover_before_calculate_totals', 10, 1);
-function fourover_before_calculate_totals($cart) {
+function fourover_before_calculate_totals($cart)
+{
     if (is_admin() && !defined('DOING_AJAX')) {
         return;
     }
@@ -859,7 +992,8 @@ function fourover_before_calculate_totals($cart) {
 
 // Make calculator products virtual (no shipping needed)
 add_filter('woocommerce_product_needs_shipping', 'fourover_disable_shipping_for_calculator', 10, 2);
-function fourover_disable_shipping_for_calculator($needs_shipping, $product) {
+function fourover_disable_shipping_for_calculator($needs_shipping, $product)
+{
     // Check if this product is in cart with calculator pricing
     foreach (WC()->cart->get_cart() as $cart_item) {
         if (isset($cart_item['fourover_custom_price']) && $cart_item['product_id'] == $product->get_id()) {
@@ -871,7 +1005,8 @@ function fourover_disable_shipping_for_calculator($needs_shipping, $product) {
 
 // Add free shipping method for calculator products
 add_filter('woocommerce_package_rates', 'fourover_add_free_shipping', 10, 2);
-function fourover_add_free_shipping($rates, $package) {
+function fourover_add_free_shipping($rates, $package)
+{
     // Check if package contains calculator products
     $has_calculator_product = false;
 
@@ -898,7 +1033,8 @@ function fourover_add_free_shipping($rates, $package) {
 
 // Prevent quantity changes for calculator items - always keep it as 1
 add_filter('woocommerce_cart_item_quantity', 'fourover_lock_cart_item_quantity', 10, 3);
-function fourover_lock_cart_item_quantity($product_quantity, $cart_item_key, $cart_item) {
+function fourover_lock_cart_item_quantity($product_quantity, $cart_item_key, $cart_item)
+{
     // If this is a calculator item, return quantity as plain text (not editable)
     if (isset($cart_item['fourover_custom_price'])) {
         return '1'; // Just show 1, not editable
@@ -908,7 +1044,8 @@ function fourover_lock_cart_item_quantity($product_quantity, $cart_item_key, $ca
 
 // Force quantity to always be 1 for calculator items (prevent manual changes)
 add_filter('woocommerce_cart_item_quantity', 'fourover_force_quantity_one', 10, 3);
-function fourover_force_quantity_one($quantity, $cart_item_key, $cart_item) {
+function fourover_force_quantity_one($quantity, $cart_item_key, $cart_item)
+{
     if (isset($cart_item['fourover_custom_price'])) {
         // Return empty string - quantity column will be hidden by CSS
         return '';
@@ -917,7 +1054,8 @@ function fourover_force_quantity_one($quantity, $cart_item_key, $cart_item) {
 }
 
 // Helper function to get file type icon
-function fourover_get_file_icon($filename) {
+function fourover_get_file_icon($filename)
+{
     $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
     $icons = array(
@@ -942,7 +1080,8 @@ function fourover_get_file_icon($filename) {
 
 // Block any attempt to update quantity for calculator items
 add_filter('woocommerce_update_cart_action_cart_updated', 'fourover_prevent_quantity_update', 10, 1);
-function fourover_prevent_quantity_update($cart_updated) {
+function fourover_prevent_quantity_update($cart_updated)
+{
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
         if (isset($cart_item['fourover_custom_price'])) {
             // Force set quantity back to 1
@@ -954,7 +1093,8 @@ function fourover_prevent_quantity_update($cart_updated) {
 
 // Display custom options in cart
 add_filter('woocommerce_get_item_data', 'fourover_get_item_data', 10, 2);
-function fourover_get_item_data($item_data, $cart_item) {
+function fourover_get_item_data($item_data, $cart_item)
+{
     if (isset($cart_item['fourover_options'])) {
         $options = is_string($cart_item['fourover_options']) ? json_decode($cart_item['fourover_options'], true) : $cart_item['fourover_options'];
 
@@ -989,21 +1129,33 @@ function fourover_get_item_data($item_data, $cart_item) {
         );
     }
 
-    // Display uploaded files
+    // Display uploaded files with download links
     if (isset($cart_item['fourover_front_file']) && !empty($cart_item['fourover_front_file'])) {
-        $icon = fourover_get_file_icon($cart_item['fourover_front_file']);
+        $file_url = $cart_item['fourover_front_file'];
+        $file_name = basename($file_url);
+        $icon = fourover_get_file_icon($file_name);
+
+        // Create download link
+        $download_link = '<a href="' . esc_url($file_url) . '" download target="_blank">' . $icon . ' ' . esc_html($file_name) . ' (Download)</a>';
+
         $item_data[] = array(
             'name' => __('Front Side Artwork', '4over-calc'),
-            'value' => $icon . ' ' . $cart_item['fourover_front_file'],
+            'value' => $download_link,
             'display' => ''
         );
     }
 
     if (isset($cart_item['fourover_back_file']) && !empty($cart_item['fourover_back_file'])) {
-        $icon = fourover_get_file_icon($cart_item['fourover_back_file']);
+        $file_url = $cart_item['fourover_back_file'];
+        $file_name = basename($file_url);
+        $icon = fourover_get_file_icon($file_name);
+
+        // Create download link
+        $download_link = '<a href="' . esc_url($file_url) . '" download target="_blank">' . $icon . ' ' . esc_html($file_name) . ' (Download)</a>';
+
         $item_data[] = array(
             'name' => __('Back Side Artwork', '4over-calc'),
-            'value' => $icon . ' ' . $cart_item['fourover_back_file'],
+            'value' => $download_link,
             'display' => ''
         );
     }
@@ -1021,7 +1173,8 @@ function fourover_get_item_data($item_data, $cart_item) {
 
 // Save custom data to order
 add_action('woocommerce_checkout_create_order_line_item', 'fourover_checkout_create_order_line_item', 10, 4);
-function fourover_checkout_create_order_line_item($item, $cart_item_key, $values, $order) {
+function fourover_checkout_create_order_line_item($item, $cart_item_key, $values, $order)
+{
     // Save individual options as separate meta data
     if (isset($values['fourover_options'])) {
         $options = is_string($values['fourover_options']) ? json_decode($values['fourover_options'], true) : $values['fourover_options'];
@@ -1050,15 +1203,27 @@ function fourover_checkout_create_order_line_item($item, $cart_item_key, $values
         $item->add_meta_data('Configuration Summary', $values['fourover_details'], true);
     }
 
-    // Save file information
+    // Save file information with download links
     if (isset($values['fourover_front_file']) && !empty($values['fourover_front_file'])) {
-        $icon = fourover_get_file_icon($values['fourover_front_file']);
-        $item->add_meta_data('Front Side Artwork', $icon . ' ' . $values['fourover_front_file'], true);
+        $file_url = $values['fourover_front_file'];
+        $file_name = basename($file_url);
+        $icon = fourover_get_file_icon($file_name);
+
+        // Store both URL (hidden) and display value
+        $item->add_meta_data('_fourover_front_file_url', $file_url, false); // Hidden
+        $download_link = '<a href="' . esc_url($file_url) . '" download target="_blank">' . $icon . ' ' . esc_html($file_name) . ' (Download)</a>';
+        $item->add_meta_data('Front Side Artwork', $download_link, true); // Visible
     }
 
     if (isset($values['fourover_back_file']) && !empty($values['fourover_back_file'])) {
-        $icon = fourover_get_file_icon($values['fourover_back_file']);
-        $item->add_meta_data('Back Side Artwork', $icon . ' ' . $values['fourover_back_file'], true);
+        $file_url = $values['fourover_back_file'];
+        $file_name = basename($file_url);
+        $icon = fourover_get_file_icon($file_name);
+
+        // Store both URL (hidden) and display value
+        $item->add_meta_data('_fourover_back_file_url', $file_url, false); // Hidden
+        $download_link = '<a href="' . esc_url($file_url) . '" download target="_blank">' . $icon . ' ' . esc_html($file_name) . ' (Download)</a>';
+        $item->add_meta_data('Back Side Artwork', $download_link, true); // Visible
     }
 
     if (isset($values['fourover_upload_later']) && $values['fourover_upload_later'] === 'yes') {
@@ -1068,9 +1233,10 @@ function fourover_checkout_create_order_line_item($item, $cart_item_key, $values
 
 // Display order item meta in admin order view
 add_filter('woocommerce_order_item_display_meta_key', 'fourover_order_item_display_meta_key', 10, 3);
-function fourover_order_item_display_meta_key($display_key, $meta, $item) {
+function fourover_order_item_display_meta_key($display_key, $meta, $item)
+{
     // Hide internal meta keys
-    if (in_array($meta->key, array('_fourover_options_json', '_fourover_custom_price'))) {
+    if (in_array($meta->key, array('_fourover_options_json', '_fourover_custom_price', '_fourover_front_file_url', '_fourover_back_file_url'))) {
         return '';
     }
     return $display_key;
@@ -1078,7 +1244,61 @@ function fourover_order_item_display_meta_key($display_key, $meta, $item) {
 
 // Display formatted meta in order emails and admin
 add_filter('woocommerce_order_item_display_meta_value', 'fourover_order_item_display_meta_value', 10, 3);
-function fourover_order_item_display_meta_value($display_value, $meta, $item) {
+function fourover_order_item_display_meta_value($display_value, $meta, $item)
+{
+    // Don't escape HTML for file download links
+    if ($meta->key === 'Front Side Artwork' || $meta->key === 'Back Side Artwork') {
+        return $display_value; // Allow HTML for download links
+    }
     // Format the display value if needed
     return esc_html($display_value);
+}
+
+// Add file attachments to order emails
+add_filter('woocommerce_email_attachments', 'fourover_attach_files_to_email', 10, 3);
+function fourover_attach_files_to_email($attachments, $email_id, $order)
+{
+    // Only attach files to customer emails (new order, processing, completed)
+    $allowed_emails = array('customer_processing_order', 'customer_completed_order', 'new_order');
+
+    if (!in_array($email_id, $allowed_emails) || !$order) {
+        return $attachments;
+    }
+
+    // Loop through order items
+    foreach ($order->get_items() as $item_id => $item) {
+        // Get file URLs from meta
+        $front_file_url = $item->get_meta('_fourover_front_file_url');
+        $back_file_url = $item->get_meta('_fourover_back_file_url');
+
+        // Convert URL to file path and add to attachments
+        if ($front_file_url) {
+            $front_file_path = fourover_url_to_path($front_file_url);
+            if ($front_file_path && file_exists($front_file_path)) {
+                $attachments[] = $front_file_path;
+            }
+        }
+
+        if ($back_file_url) {
+            $back_file_path = fourover_url_to_path($back_file_url);
+            if ($back_file_path && file_exists($back_file_path)) {
+                $attachments[] = $back_file_path;
+            }
+        }
+    }
+
+    return $attachments;
+}
+
+// Helper function to convert URL to file path
+function fourover_url_to_path($url)
+{
+    $upload_dir = wp_upload_dir();
+    $base_url = $upload_dir['baseurl'];
+    $base_path = $upload_dir['basedir'];
+
+    // Replace base URL with base path
+    $file_path = str_replace($base_url, $base_path, $url);
+
+    return $file_path;
 }
