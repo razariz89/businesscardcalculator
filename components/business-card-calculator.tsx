@@ -189,8 +189,8 @@ export default function BusinessCardCalculator() {
 
       const data = {
         type: "CALCULATOR_DATA",
-        // Price multiplied by 2 as per business requirement
-        price: (selectedPrice?.price || 0) * 2,
+        // Price multiplied by 2.5 as per business requirement
+        price: (selectedPrice?.price || 0) * 2.5,
         options: {
           size: selectedSize,
           stock: optionDetails["Stock"] || "",
@@ -315,10 +315,13 @@ export default function BusinessCardCalculator() {
         console.log("[v0] Filtered products count:", filtered.length)
         setFilteredProducts(filtered)
 
-        // Auto-select first product when size is set
+        // Auto-select first product ONLY if no product selected or current selection not in filtered list
         if (filtered.length > 0) {
-          console.log("[v0] Auto-selecting first filtered product:", filtered[0].product_uuid)
-          setProductId(filtered[0].product_uuid)
+          const currentProductExists = filtered.some(p => p.product_uuid === productId)
+          if (!productId || !currentProductExists) {
+            console.log("[v0] Auto-selecting first filtered product:", filtered[0].product_uuid)
+            setProductId(filtered[0].product_uuid)
+          }
         }
       } else {
         // If no size selected, show all products but still normalize them
@@ -490,8 +493,20 @@ export default function BusinessCardCalculator() {
         return runsizeOk && colorOk
       })
 
+      // Remove duplicate turnaround options by description
+      const uniqueTurnarounds = relevantTurnarounds.reduce((acc: any[], current: any) => {
+        const description = current.option_description || current.option_name
+        const exists = acc.find(item => (item.option_description || item.option_name) === description)
+        if (!exists) {
+          acc.push(current)
+        }
+        return acc
+      }, [])
+
+      console.log("[v0] Unique turnarounds after deduplication:", uniqueTurnarounds.length)
+
       const results = await Promise.all(
-        relevantTurnarounds.map(async (turnOption: any) => {
+        uniqueTurnarounds.map(async (turnOption: any) => {
           const payload = {
             productId,
             colorspecId,
@@ -572,8 +587,8 @@ export default function BusinessCardCalculator() {
 
     const data = {
       type: "ADD_TO_CART",
-      // Price multiplied by 2 as per business requirement
-      price: (selectedPrice?.price || 0) * 2,
+      // Price multiplied by 2.5 as per business requirement
+      price: (selectedPrice?.price || 0) * 2.5,
       options: {
         size: selectedSize,
         stock: optionDetails["Stock"] || "",
@@ -593,9 +608,9 @@ export default function BusinessCardCalculator() {
     if (window.parent !== window) {
       window.parent.postMessage(data, "*")
     } else {
-      // If not embedded, show alert with doubled price
+      // If not embedded, show alert with multiplied price
       console.log("[v0] Not embedded, cart data:", data)
-      alert(`Added to cart!\nPrice: $${(selectedPrice?.price || 0) * 2}\nDetails: ${data.details}`)
+      alert(`Added to cart!\nPrice: $${(selectedPrice?.price || 0) * 2.5}\nDetails: ${data.details}`)
     }
   }
 
@@ -813,10 +828,10 @@ export default function BusinessCardCalculator() {
                             </div>
                           </div>
                           <div className="text-right">
-                            {/* All prices multiplied by 2 as per business requirement */}
-                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 2 * 1.1).toFixed(2)}</div>
-                            <div className="text-xs text-muted-foreground">${((priceOption.price * 2) / Number.parseInt(quantity)).toFixed(2)}</div>
-                            <div className="font-bold text-base">Total: ${(priceOption.price * 2).toFixed(2)}</div>
+                            {/* All prices multiplied by 2.5 as per business requirement */}
+                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 2.5 * 1.1).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">${((priceOption.price * 2.5) / Number.parseInt(quantity)).toFixed(2)}</div>
+                            <div className="font-bold text-base">Total: ${(priceOption.price * 2.5).toFixed(2)}</div>
                           </div>
                         </div>
                       ))}
