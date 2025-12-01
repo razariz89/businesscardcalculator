@@ -5,9 +5,9 @@ const SIGNATURE = "af92844b53ea4b1968a19b72865eb8fb1a2dd5db4618b63a32c1130c03165
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export async function GET(request: Request, { params }: { params: { categoryId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ categoryId: string }> }) {
   try {
-    const categoryId = params.categoryId
+    const { categoryId } = await params
     const allProducts: any[] = []
     let offset = 0
     const limit = 20

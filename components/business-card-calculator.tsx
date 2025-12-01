@@ -623,14 +623,8 @@ export default function BusinessCardCalculator() {
     </div>
   )
 
-  // Show skeleton only during initial load
-  if (!initialLoadComplete && (loading || optionGroupsLoading || productsLoading || optionGroups.length === 0)) {
-    return (
-      <div className="w-full max-w-4xl mx-auto py-6">
-        <LoadingSkeleton />
-      </div>
-    )
-  }
+  // Check if initial data is still loading (NOT price calculation)
+  const isInitialLoading = !initialLoadComplete || optionGroupsLoading || productsLoading || optionGroups.length === 0
 
   const sizeGroup = optionGroups.find((g) => g.product_option_group_name === "Size")
   const stockGroup = optionGroups.find((g) => g.product_option_group_name === "Stock")
@@ -644,7 +638,16 @@ export default function BusinessCardCalculator() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-0">
-      <div className="space-y-4">
+      <div className="space-y-4 relative">
+        {/* Loading overlay - shows during initial load */}
+        {isInitialLoading && (
+          <div className="absolute inset-0 bg-white/60 z-50 flex items-center justify-center rounded-lg pointer-events-none">
+            <div className="flex flex-col items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-lg">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <p className="text-sm text-gray-600 font-medium">Loading calculator...</p>
+            </div>
+          </div>
+        )}
               {/* Hide category dropdown in embedded mode when category is passed via URL */}
               {categories.length > 0 && !embeddedMode && (
                 <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
@@ -687,9 +690,7 @@ export default function BusinessCardCalculator() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <div className="h-10 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
-                    <span className="text-sm text-muted-foreground">Loading sizes...</span>
-                  </div>
+                  <div className="h-10 bg-gray-50 rounded-lg border border-gray-200"></div>
                 )}
               </div>
 
@@ -697,9 +698,7 @@ export default function BusinessCardCalculator() {
               <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
                 <Label htmlFor="product" className="text-sm font-semibold text-left mb-1 sm:mb-0">Product</Label>
                 {productsLoading ? (
-                  <div className="h-10 flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  </div>
+                  <div className="h-10 bg-gray-50 rounded-lg border border-gray-200"></div>
                 ) : (
                   <Select value={productId || ""} onValueChange={setProductId}>
                     <SelectTrigger id="product" className="h-10 text-sm">
@@ -716,54 +715,82 @@ export default function BusinessCardCalculator() {
                 )}
               </div>
 
-              {optionGroups.map((group) => {
-                // Skip Turn Around Time - it's handled separately below
-                if (group.product_option_group_name === "Turn Around Time") {
-                  return null
-                }
-
-                // Hide these fields in embedded mode (WordPress handles them)
-                const hiddenFieldsInEmbedded = [
-                  "Product Type",
-                  "Product Category",
-                  "Size",
-                  "Product Orientation",
-                  "Shape"
-                ]
-
-                if (embeddedMode && hiddenFieldsInEmbedded.includes(group.product_option_group_name)) {
-                  return null
-                }
-
-                return (
-                  <div key={group.product_option_group_uuid} className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
-                    <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left mb-1 sm:mb-0">
-                      {group.product_option_group_name === "Runsize" ? "Quantity" : group.product_option_group_name}
-                    </Label>
-                    <Select
-                      value={selectedOptions[group.product_option_group_name] || ""}
-                      onValueChange={(value) => handleOptionChange(group.product_option_group_name, value)}
-                    >
-                      <SelectTrigger id={group.product_option_group_name} className="h-10 text-sm">
-                        <SelectValue placeholder={`Select ${group.product_option_group_name === "Runsize" ? "quantity" : group.product_option_group_name.toLowerCase()}`} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {group.options.map((option) => (
-                          <SelectItem key={option.option_uuid} value={option.option_uuid || ""}>
-                            {option.option_description || option.option_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              {/* Show placeholder fields during initial load */}
+              {optionGroups.length === 0 ? (
+                <>
+                  {/* Quantity placeholder */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                    <Label className="text-sm font-semibold text-left mb-1 sm:mb-0">Quantity</Label>
+                    <div className="h-10 bg-gray-50 rounded-lg border border-gray-200"></div>
                   </div>
-                )
-              })}
+                  {/* Stock placeholder */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                    <Label className="text-sm font-semibold text-left mb-1 sm:mb-0">Stock</Label>
+                    <div className="h-10 bg-gray-50 rounded-lg border border-gray-200"></div>
+                  </div>
+                  {/* Coating placeholder */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                    <Label className="text-sm font-semibold text-left mb-1 sm:mb-0">Coating</Label>
+                    <div className="h-10 bg-gray-50 rounded-lg border border-gray-200"></div>
+                  </div>
+                  {/* Colorspec placeholder */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                    <Label className="text-sm font-semibold text-left mb-1 sm:mb-0">Colorspec</Label>
+                    <div className="h-10 bg-gray-50 rounded-lg border border-gray-200"></div>
+                  </div>
+                </>
+              ) : (
+                optionGroups.map((group) => {
+                  // Skip Turn Around Time - it's handled separately below
+                  if (group.product_option_group_name === "Turn Around Time") {
+                    return null
+                  }
+
+                  // Hide these fields in embedded mode (WordPress handles them)
+                  const hiddenFieldsInEmbedded = [
+                    "Product Type",
+                    "Product Category",
+                    "Size",
+                    "Product Orientation",
+                    "Shape"
+                  ]
+
+                  if (embeddedMode && hiddenFieldsInEmbedded.includes(group.product_option_group_name)) {
+                    return null
+                  }
+
+                  return (
+                    <div key={group.product_option_group_uuid} className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3 items-center">
+                      <Label htmlFor={group.product_option_group_name} className="text-sm font-semibold text-left mb-1 sm:mb-0">
+                        {group.product_option_group_name === "Runsize" ? "Quantity" : group.product_option_group_name}
+                      </Label>
+                      <Select
+                        value={selectedOptions[group.product_option_group_name] || ""}
+                        onValueChange={(value) => handleOptionChange(group.product_option_group_name, value)}
+                      >
+                        <SelectTrigger id={group.product_option_group_name} className="h-10 text-sm">
+                          <SelectValue placeholder={`Select ${group.product_option_group_name === "Runsize" ? "quantity" : group.product_option_group_name.toLowerCase()}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {group.options.map((option) => (
+                            <SelectItem key={option.option_uuid} value={option.option_uuid || ""}>
+                              {option.option_description || option.option_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )
+                })
+              )}
 
               <div className="">
                 <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-3">
                   <Label className="text-sm font-semibold text-left mb-1 sm:mb-0 pt-2">Ready to Ship In</Label>
                   <div className="space-y-2">
-                  {calculating ? (
+                  {optionGroups.length === 0 ? (
+                    <div className="h-24 bg-gray-50 rounded-lg border border-gray-200"></div>
+                  ) : calculating ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </div>

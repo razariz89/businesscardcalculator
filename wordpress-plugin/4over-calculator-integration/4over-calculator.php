@@ -149,7 +149,7 @@ class FourOver_Calculator_Integration
                 <iframe
                     id="fourover-calculator-iframe"
                     src="<?php echo esc_url($calculator_url . '?categoryId=' . urlencode($category_id) . '&embedded=true'); ?>"
-                    style="width: 100% !important; min-height: 400px !important; height: auto !important; border: none !important; display: block !important; overflow: hidden !important;"
+                    style="width: 100% !important; height: 600px !important; border: none !important; display: block !important; overflow: hidden !important;"
                     frameborder="0"
                     scrolling="no"></iframe>
             </div>
@@ -163,7 +163,8 @@ class FourOver_Calculator_Integration
             <input type="hidden" id="fourover-upload-later" name="fourover_upload_later" value="" />
 
             <div class="fourover-cart-actions" style="display: block !important;">
-                <button type="button" id="fourover-upload-file-btn" class="button" style="display: block !important; width: 100% !important;">
+                <button type="button" id="fourover-upload-file-btn" class="button" style="display: block !important; width: 100% !important;    max-width: 300px;
+    margin: auto;">
                     <?php _e('Upload Your File', '4over-calc'); ?>
                 </button>
                 <!-- Add to Cart button hidden on product page, only visible in drawer -->
