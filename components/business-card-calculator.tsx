@@ -189,7 +189,8 @@ export default function BusinessCardCalculator() {
 
       const data = {
         type: "CALCULATOR_DATA",
-        price: selectedPrice?.price || 0,
+        // Price multiplied by 2 as per business requirement
+        price: (selectedPrice?.price || 0) * 2,
         options: {
           size: selectedSize,
           stock: optionDetails["Stock"] || "",
@@ -571,7 +572,8 @@ export default function BusinessCardCalculator() {
 
     const data = {
       type: "ADD_TO_CART",
-      price: selectedPrice?.price || 0,
+      // Price multiplied by 2 as per business requirement
+      price: (selectedPrice?.price || 0) * 2,
       options: {
         size: selectedSize,
         stock: optionDetails["Stock"] || "",
@@ -591,9 +593,9 @@ export default function BusinessCardCalculator() {
     if (window.parent !== window) {
       window.parent.postMessage(data, "*")
     } else {
-      // If not embedded, show alert
+      // If not embedded, show alert with doubled price
       console.log("[v0] Not embedded, cart data:", data)
-      alert(`Added to cart!\nPrice: $${selectedPrice?.price}\nDetails: ${data.details}`)
+      alert(`Added to cart!\nPrice: $${(selectedPrice?.price || 0) * 2}\nDetails: ${data.details}`)
     }
   }
 
@@ -623,8 +625,9 @@ export default function BusinessCardCalculator() {
     </div>
   )
 
-  // Check if initial data is still loading (NOT price calculation)
-  const isInitialLoading = !initialLoadComplete || optionGroupsLoading || productsLoading || optionGroups.length === 0
+  // Only show loading overlay during the very first initial load
+  // Once initialLoadComplete is true, never show the overlay again
+  const isInitialLoading = !initialLoadComplete
 
   const sizeGroup = optionGroups.find((g) => g.product_option_group_name === "Size")
   const stockGroup = optionGroups.find((g) => g.product_option_group_name === "Stock")
@@ -644,7 +647,7 @@ export default function BusinessCardCalculator() {
           <div className="absolute inset-0 bg-white/60 z-50 flex items-center justify-center rounded-lg pointer-events-none">
             <div className="flex flex-col items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-lg">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              <p className="text-sm text-gray-600 font-medium">Loading calculator...</p>
+              <p className="text-sm text-gray-600 font-medium">Loading product...</p>
             </div>
           </div>
         )}
@@ -810,9 +813,10 @@ export default function BusinessCardCalculator() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 1.1).toFixed(2)}</div>
-                            <div className="text-xs text-muted-foreground">${(priceOption.price / Number.parseInt(quantity)).toFixed(2)}</div>
-                            <div className="font-bold text-base">Total: ${priceOption.price.toFixed(2)}</div>
+                            {/* All prices multiplied by 2 as per business requirement */}
+                            <div className="text-sm text-muted-foreground line-through">${(priceOption.price * 2 * 1.1).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">${((priceOption.price * 2) / Number.parseInt(quantity)).toFixed(2)}</div>
+                            <div className="font-bold text-base">Total: ${(priceOption.price * 2).toFixed(2)}</div>
                           </div>
                         </div>
                       ))}
